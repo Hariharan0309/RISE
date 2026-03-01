@@ -1,5 +1,5 @@
 """
-MissionAI Farmer Agent - Tests Module
-
-This module contains unit tests and property-based tests.
+RISE Test Suite
 """
+
+__version__ = "0.1.0"

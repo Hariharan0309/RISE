@@ -1,5 +1,6 @@
 """
-MissionAI Farmer Agent - Tools Module
-
-This module contains custom tool functions for agent capabilities.
+RISE Tools Module
+Strands Agent tools for agricultural operations
 """
+
+__version__ = "0.1.0"
