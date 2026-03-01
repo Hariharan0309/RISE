@@ -171,9 +171,13 @@ def check_eligibility(
     
     # Check crop types (if specified)
     if criteria.get("crop_types") and len(criteria["crop_types"]) > 0:
-        if "farm" in farmer_profile and "current_crops" in farmer_profile["farm"]:
+        required_crops = [c.lower() for c in criteria["crop_types"]]
+        
+        # Check if "all" is in required crops (means any crop is eligible)
+        if "all" in required_crops or "all crops" in required_crops or "all notified crops" in required_crops or "all storable crops" in required_crops:
+            reasons.append("All crops are eligible for this scheme")
+        elif "farm" in farmer_profile and "current_crops" in farmer_profile["farm"]:
             farmer_crops = [c.lower() for c in farmer_profile["farm"]["current_crops"]]
-            required_crops = [c.lower() for c in criteria["crop_types"]]
             
             # Check if farmer grows any of the required crops
             matching_crops = [c for c in farmer_crops if c in required_crops]

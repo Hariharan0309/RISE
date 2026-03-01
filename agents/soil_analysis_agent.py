@@ -10,7 +10,7 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 import uuid
 
-from data_models import SoilAnalysisResult
+from data_models import SoilAnalysisResult, Nutrients, CropRecommendation
 
 logger = logging.getLogger(__name__)
 
@@ -192,28 +192,28 @@ def assess_fertility(soil_type: str, indicators: Optional[Dict[str, Any]] = None
         fertility = fertility_defaults.get(soil_type_lower, "medium")
         
         # Mock nutrient assessment (would use actual soil test data in production)
-        nutrients = {
-            "nitrogen": "adequate",
-            "phosphorus": "adequate",
-            "potassium": "adequate",
-            "organic_matter": "medium"
-        }
+        nutrients = Nutrients(
+            nitrogen="adequate",
+            phosphorus="adequate",
+            potassium="adequate",
+            organic_matter="medium"
+        )
         
         # Adjust based on indicators if provided
         if indicators:
             if "ph" in indicators:
                 ph = indicators["ph"]
                 if ph < 5.5:
-                    nutrients["nitrogen"] = "deficient"
+                    nutrients.nitrogen = "deficient"
                     fertility = "low"
                 elif ph > 8.0:
-                    nutrients["phosphorus"] = "deficient"
+                    nutrients.phosphorus = "deficient"
                     fertility = "low"
             
             if "organic_matter" in indicators:
                 om = indicators["organic_matter"]
                 if om < 2.0:
-                    nutrients["organic_matter"] = "low"
+                    nutrients.organic_matter = "low"
                     fertility = "low" if fertility != "high" else "medium"
         
         # Estimate pH based on soil type if not provided
@@ -226,9 +226,9 @@ def assess_fertility(soil_type: str, indicators: Optional[Dict[str, Any]] = None
             "soil_type": soil_type,
             "fertility": fertility,
             "ph_level": indicators.get("ph", estimated_ph) if indicators else estimated_ph,
-            "nutrients": nutrients,
+            "nutrients": nutrients.to_dict(),
             "assessment": f"Soil fertility is {fertility}",
-            "recommendations": _get_fertility_recommendations(fertility, nutrients)
+            "recommendations": _get_fertility_recommendations(fertility, nutrients.to_dict())
         }
         
     except Exception as e:
@@ -354,12 +354,21 @@ def _get_care_requirements(crop: str, soil_type: str) -> List[str]:
     elif soil_type == "laterite":
         requirements.append("Add organic matter regularly")
         requirements.append("Monitor pH levels")
+    elif soil_type == "loam":
+        requirements.append("Maintain soil structure with organic matter")
+        requirements.append("Practice crop rotation")
+    elif soil_type == "silt":
+        requirements.append("Prevent soil compaction")
+        requirements.append("Ensure adequate drainage")
     
     # Crop-specific requirements
     if crop in ["rice", "sugarcane"]:
         requirements.append("Requires consistent water supply")
     elif crop in ["groundnut", "potato"]:
         requirements.append("Avoid excessive moisture")
+    elif crop in ["tomato", "vegetables"]:
+        requirements.append("Regular watering and mulching recommended")
+        requirements.append("Monitor for pests and diseases")
     
     return requirements
 
@@ -519,11 +528,27 @@ Provide recommendations that are:
         fertility = assess_fertility(soil_type)
         
         # Recommend crops
-        crops = recommend_crops(soil_type, season, location)
+        crops_data = recommend_crops(soil_type, season, location)
+        crops = [CropRecommendation(
+            crop=c["crop"],
+            suitability=c["suitability"],
+            expected_yield=c["expected_yield"],
+            season=c.get("season"),
+            care_requirements=c.get("care_requirements", [])
+        ) for c in crops_data]
         
         # Get improvement tips
-        deficiencies = [k for k, v in fertility.get("nutrients", {}).items() if v == "deficient"]
+        nutrients_dict = fertility.get("nutrients", {})
+        deficiencies = [k for k, v in nutrients_dict.items() if v == "deficient"]
         improvement_tips = get_soil_improvement_tips(soil_type, deficiencies)
+        
+        # Create Nutrients object
+        nutrients_obj = Nutrients(
+            nitrogen=nutrients_dict.get("nitrogen", "adequate"),
+            phosphorus=nutrients_dict.get("phosphorus", "adequate"),
+            potassium=nutrients_dict.get("potassium", "adequate"),
+            organic_matter=nutrients_dict.get("organic_matter", "medium")
+        )
         
         # Create complete result
         result = SoilAnalysisResult(
@@ -531,7 +556,7 @@ Provide recommendations that are:
             soil_type=classification["soil_name"],
             fertility=fertility.get("fertility", "medium"),
             ph_level=fertility.get("ph_level", 6.5),
-            nutrients=fertility.get("nutrients", {}),
+            nutrients=nutrients_obj,
             recommended_crops=crops,
             improvement_tips=improvement_tips,
             timestamp=datetime.now().isoformat()

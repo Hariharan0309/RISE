@@ -136,6 +136,8 @@ class CropRecommendation:
     crop: str
     suitability: str
     expected_yield: str
+    season: Optional[str] = None
+    care_requirements: List[str] = field(default_factory=list)
     
     def to_dict(self) -> dict:
         return asdict(self)
