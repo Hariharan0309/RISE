@@ -30,7 +30,7 @@ This implementation plan breaks down the RISE (Rural Innovation and Sustainable 
   - _Requirements: Technical Constraints - Platform Constraints_
   - _Reference: [Strands Agents Quickstart](https://github.com/awslabs/strands-agents)_
 
-- [ ] 2. Set up core AWS services infrastructure
+- [x] 2. Set up core AWS services infrastructure
   - Define DynamoDB tables using AWS CDK (UserProfiles, FarmData, DiagnosisHistory, ResourceSharing, BuyingGroups, ResourceBookings)
   - Configure S3 buckets with lifecycle policies for images, audio, and documents
   - Set up CloudFront CDN distribution

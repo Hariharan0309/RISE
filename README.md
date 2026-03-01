@@ -34,6 +34,13 @@ RISE/
 ├── ui/                     # Streamlit UI components
 ├── data/                   # Data storage
 ├── tests/                  # Test suite
+├── infrastructure/         # AWS CDK infrastructure code
+│   ├── stacks/             # CDK stack definitions
+│   ├── app.py              # CDK application entry point
+│   ├── aws_services.py     # AWS service utilities
+│   ├── deploy.sh           # Deployment script
+│   ├── verify_deployment.py # Infrastructure verification
+│   └── README.md           # Infrastructure documentation
 ├── app.py                  # Main Streamlit application
 ├── config.py               # Configuration management
 ├── requirements.txt        # Python dependencies
@@ -85,28 +92,50 @@ The application will be available at `http://localhost:8501`
 
 ## AWS Services Setup
 
+RISE uses AWS CDK for infrastructure as code. All AWS resources are defined and deployed automatically.
+
+### Quick Infrastructure Deployment
+
+```bash
+cd infrastructure
+./deploy.sh
+```
+
+This will create:
+- 6 DynamoDB tables with GSIs
+- S3 bucket with lifecycle policies
+- CloudFront CDN distribution
+- API Gateway (REST + WebSocket)
+- IAM roles for Bedrock access
+
+### Detailed Infrastructure Setup
+
+See [infrastructure/DEPLOYMENT_GUIDE.md](infrastructure/DEPLOYMENT_GUIDE.md) for comprehensive instructions.
+
 ### Amazon Bedrock Access
 
+After infrastructure deployment, enable Bedrock model access:
+
 1. Navigate to Amazon Bedrock console
-2. Request model access for Claude 3 Sonnet
-3. Wait for approval (usually instant for most regions)
+2. Click "Model access" in the left sidebar
+3. Click "Manage model access"
+4. Enable:
+   - ✅ Anthropic Claude 3 Sonnet
+   - ✅ Amazon Nova (all variants)
+5. Save changes and wait for approval
 
-### DynamoDB Tables
+### Verify Infrastructure
 
-Tables will be created automatically on first use:
-- RISE-UserProfiles
-- RISE-FarmData
-- RISE-DiagnosisHistory
-- RISE-ResourceSharing
-- RISE-BuyingGroups
-- RISE-ResourceBookings
-
-### S3 Bucket
-
-Create an S3 bucket for storing images and documents:
 ```bash
-aws s3 mb s3://rise-application-data --region us-east-1
+cd infrastructure
+python verify_deployment.py
 ```
+
+This checks:
+- ✅ All DynamoDB tables created
+- ✅ S3 bucket configured
+- ✅ Bedrock model access enabled
+- ✅ Overall infrastructure status
 
 ## Development
 
@@ -124,7 +153,9 @@ black .
 
 ## Implementation Phases
 
-- ✅ **Phase 1:** Foundation & Strands Agents Setup (Current)
+- ✅ **Phase 1:** Foundation & Strands Agents Setup
+  - ✅ Task 1: Initialize project structure
+  - ✅ Task 2: Set up core AWS services infrastructure
 - ⏳ **Phase 2:** Voice & Multilingual Tools
 - ⏳ **Phase 3:** AI-Powered Crop Diagnosis
 - ⏳ **Phase 4:** Soil Intelligence & Recommendations
