@@ -3,51 +3,92 @@
 ## Overview
 This implementation plan breaks down the RISE (Rural Innovation and Sustainable Ecosystem) platform into actionable coding tasks. Each task builds incrementally toward a complete AI-powered farming assistant leveraging AWS services.
 
+**Core Framework:** AWS Strands Agents SDK - An open-source, model-first framework for building autonomous AI agents with native AWS integration.
+
+**Architecture Approach:**
+- Multi-agent system using Strands Agents patterns (Supervisor-Agent model)
+- Amazon Bedrock for foundation models (Claude 3 Sonnet, Amazon Nova)
+- Model Context Protocol (MCP) for tool integration
+- Agent-to-Agent (A2A) communication for specialist agents
+- Amazon Bedrock AgentCore for production deployment
+
 ---
 
-## Phase 1: Foundation & Infrastructure Setup
+## Phase 1: Foundation & Strands Agents Setup
 
-- [ ] 1. Initialize project structure and AWS infrastructure
+- [ ] 1. Initialize project structure with Strands Agents
+  - Install Strands Agents SDK (`pip install strands-agents`)
   - Create React.js frontend with TypeScript and Vite
   - Set up AWS CDK project for infrastructure as code
-  - Configure AWS credentials and region settings
+  - Configure AWS credentials and Amazon Bedrock access
   - Initialize Git repository with proper .gitignore
+  - Set up Python virtual environment for agent development
   - _Requirements: Technical Constraints - Platform Constraints_
+  - _Reference: [Strands Agents Quickstart](https://github.com/awslabs/strands-agents)_
 
 - [ ] 2. Set up core AWS services infrastructure
   - Define DynamoDB tables using AWS CDK (UserProfiles, FarmData, DiagnosisHistory, ResourceSharing, BuyingGroups, ResourceBookings)
   - Configure S3 buckets with lifecycle policies for images, audio, and documents
   - Set up CloudFront CDN distribution
   - Configure API Gateway with REST and WebSocket APIs
+  - Enable Amazon Bedrock model access (Claude 3 Sonnet, Amazon Nova)
+  - Configure OpenTelemetry (OTEL) for agent observability
   - _Requirements: Technical Constraints - AWS Service Requirements_
 
-- [ ] 3. Implement authentication and user management
+- [ ] 3. Create base orchestrator agent with Strands
+  - Initialize main orchestrator agent using Strands Agent class
+  - Configure Amazon Bedrock as the model provider
+  - Define system prompt for RISE farming assistant role
+  - Set up agent session management and conversation context
+  - Implement basic agent loop with error handling
+  - Add OTEL instrumentation for tracing and metrics
+  - _Requirements: Epic 1 - User Stories 1.1, 1.2_
+  - _Reference: Strands single-agent pattern_
+
+- [ ] 4. Implement authentication and API infrastructure
   - Configure AWS Cognito User Pools
   - Create user registration Lambda function
   - Implement login/logout Lambda functions with JWT token generation
   - Build frontend authentication components (Login, Register, Profile)
   - Add role-based access control (RBAC) middleware
-  - _Requirements: Epic 1 - User Stories 1.1, 1.2_
-
-- [ ] 4. Create base API structure and error handling
-  - Set up API Gateway routes for all endpoints
-  - Implement Lambda function base classes with error handling
-  - Create standardized API response formats
-  - Add request validation middleware
+  - Set up API Gateway routes for agent invocation
   - Configure CORS and security headers
   - _Requirements: Non-Functional Requirements - Security and Privacy_
 
 ---
 
-## Phase 2: Voice & Multilingual Interface
+## Phase 2: Voice & Multilingual Tools for Agents
 
-- [ ] 5. Implement voice input processing
-  - Integrate Amazon Transcribe for speech-to-text
-  - Create voice recording component in frontend
-  - Build Lambda function for audio file upload to S3
-  - Implement automatic language detection
+- [ ] 5. Create voice processing tools using Strands @tool decorator
+  - Define `@tool` for Amazon Transcribe speech-to-text
+  - Create `@tool` for Amazon Polly text-to-speech
+  - Implement automatic language detection tool
   - Add support for 9 Indic languages (Hindi, Tamil, Telugu, Kannada, Bengali, Gujarati, Marathi, Punjabi, English)
-  - Handle background noise and accent variations
+  - Handle background noise and accent variations in transcription
+  - Build frontend voice recording component
+  - Create Lambda function for audio file upload to S3
+  - _Requirements: Epic 1 - User Story 1.1_
+  - _Reference: Strands tool use and integration_
+
+- [ ] 6. Create translation tools for multilingual support
+  - Define `@tool` for Amazon Translate with custom agricultural terminology
+  - Create language preference management tool
+  - Implement context-aware translation with cultural adaptation
+  - Build fallback mechanism to Hindi with English technical terms
+  - Add translation caching for performance
+  - Enable hot-reloading for tool updates during development
+  - _Requirements: Epic 1 - User Story 1.2_
+  - _Reference: Strands tools library (strands-agents-tools)_
+
+- [ ] 7. Implement conversation context management
+  - Create DynamoDB table for conversation history
+  - Build context retrieval tool for agent memory
+  - Implement session state management in Strands agent
+  - Add follow-up question handling with context awareness
+  - Create conversation summarization tool for long sessions
+  - Implement session timeout and cleanup
+  - _Requirements: Epic 1 - User Story 1.1 (context maintenance)_
+  - _Reference: Strands memory and context handling_
   - _Requirements: Epic 1 - User Story 1.1_
 
 - [ ] 6. Implement multilingual response generation
