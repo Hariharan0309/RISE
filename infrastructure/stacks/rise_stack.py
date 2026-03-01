@@ -111,6 +111,20 @@ class RiseStack(Stack):
             encryption=dynamodb.TableEncryption.AWS_MANAGED,
         )
         
+        # Add GSI for user-based diagnosis retrieval
+        self.diagnosis_history_table.add_global_secondary_index(
+            index_name="UserDiagnosisIndex",
+            partition_key=dynamodb.Attribute(
+                name="user_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="created_timestamp",
+                type=dynamodb.AttributeType.NUMBER
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        
         # Resource Sharing Table
         self.resource_sharing_table = dynamodb.Table(
             self, "ResourceSharingTable",
@@ -226,6 +240,91 @@ class RiseStack(Stack):
             ),
             projection_type=dynamodb.ProjectionType.ALL
         )
+        
+        # Conversation History Table
+        self.conversation_history_table = dynamodb.Table(
+            self, "ConversationHistoryTable",
+            table_name="RISE-ConversationHistory",
+            partition_key=dynamodb.Attribute(
+                name="session_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="timestamp",
+                type=dynamodb.AttributeType.NUMBER
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+            time_to_live_attribute="ttl",  # Enable TTL for automatic cleanup
+        )
+        
+        # Add GSI for user-based conversation retrieval
+        self.conversation_history_table.add_global_secondary_index(
+            index_name="UserConversationIndex",
+            partition_key=dynamodb.Attribute(
+                name="user_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="timestamp",
+                type=dynamodb.AttributeType.NUMBER
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        
+        # Pest Diagnosis History Table
+        self.pest_diagnosis_table = dynamodb.Table(
+            self, "PestDiagnosisHistoryTable",
+            table_name="RISE-PestDiagnosisHistory",
+            partition_key=dynamodb.Attribute(
+                name="diagnosis_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+        )
+        
+        # Add GSI for user-based pest diagnosis retrieval
+        self.pest_diagnosis_table.add_global_secondary_index(
+            index_name="UserPestDiagnosisIndex",
+            partition_key=dynamodb.Attribute(
+                name="user_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="created_timestamp",
+                type=dynamodb.AttributeType.NUMBER
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        
+        # Pest Knowledge Base Table
+        self.pest_knowledge_table = dynamodb.Table(
+            self, "PestKnowledgeBaseTable",
+            table_name="RISE-PestKnowledgeBase",
+            partition_key=dynamodb.Attribute(
+                name="pest_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+        )
+        
+        # Add GSI for pest name search
+        self.pest_knowledge_table.add_global_secondary_index(
+            index_name="PestNameIndex",
+            partition_key=dynamodb.Attribute(
+                name="pest_name",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
 
     def _create_s3_buckets(self):
         """Create S3 buckets with lifecycle policies"""
@@ -250,6 +349,22 @@ class RiseStack(Stack):
                 s3.LifecycleRule(
                     id="ArchiveCropImages",
                     prefix="images/crop-photos/",
+                    transitions=[
+                        s3.Transition(
+                            storage_class=s3.StorageClass.INFREQUENT_ACCESS,
+                            transition_after=Duration.days(90)
+                        ),
+                        s3.Transition(
+                            storage_class=s3.StorageClass.GLACIER,
+                            transition_after=Duration.days(365)
+                        )
+                    ],
+                    enabled=True
+                ),
+                # Pest images - move to IA after 90 days, Glacier after 1 year
+                s3.LifecycleRule(
+                    id="ArchivePestImages",
+                    prefix="images/pest-photos/",
                     transitions=[
                         s3.Transition(
                             storage_class=s3.StorageClass.INFREQUENT_ACCESS,
@@ -503,9 +618,12 @@ class RiseStack(Stack):
         self.user_profiles_table.grant_read_write_data(self.bedrock_execution_role)
         self.farm_data_table.grant_read_write_data(self.bedrock_execution_role)
         self.diagnosis_history_table.grant_read_write_data(self.bedrock_execution_role)
+        self.pest_diagnosis_table.grant_read_write_data(self.bedrock_execution_role)
+        self.pest_knowledge_table.grant_read_write_data(self.bedrock_execution_role)
         self.resource_sharing_table.grant_read_write_data(self.bedrock_execution_role)
         self.buying_groups_table.grant_read_write_data(self.bedrock_execution_role)
         self.resource_bookings_table.grant_read_write_data(self.bedrock_execution_role)
+        self.conversation_history_table.grant_read_write_data(self.bedrock_execution_role)
         
         # Grant S3 access
         self.app_data_bucket.grant_read_write(self.bedrock_execution_role)
