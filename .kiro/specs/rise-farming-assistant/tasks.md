@@ -45,15 +45,15 @@ This implementation plan breaks down the RISE (Rural Innovation and Sustainable 
   - _Requirements: Epic 1 - User Stories 1.1, 1.2_
   - _Reference: Strands single-agent pattern_
 
-- [ ] 4. Implement authentication and API infrastructure
-  - Configure AWS Cognito User Pools
-  - Create user registration Lambda function
-  - Implement login/logout Lambda functions with JWT token generation
-  - Build frontend authentication components (Login, Register, Profile)
-  - Add role-based access control (RBAC) middleware
-  - Set up API Gateway routes for agent invocation
-  - Configure CORS and security headers
-  - _Requirements: Non-Functional Requirements - Security and Privacy_
+- [ ] 4. Create basic Streamlit frontend
+  - Create main Streamlit app (`app.py`)
+  - Build chat interface with `st.chat_message()` and `st.chat_input()`
+  - Add sidebar for user profile and settings
+  - Implement session state management
+  - Create simple authentication with `st.text_input()` for demo
+  - Add language selector dropdown (9 Indic languages)
+  - Style with Streamlit theming (agricultural theme)
+  - _Requirements: Non-Functional Requirements - Accessibility_
 
 ---
 
