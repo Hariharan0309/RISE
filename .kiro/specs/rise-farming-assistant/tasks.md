@@ -5,24 +5,28 @@ This implementation plan breaks down the RISE (Rural Innovation and Sustainable 
 
 **Core Framework:** AWS Strands Agents SDK - An open-source, model-first framework for building autonomous AI agents with native AWS integration.
 
+**Frontend:** Streamlit - Simple, fast Python-based web framework perfect for hackathon demos.
+
 **Architecture Approach:**
 - Multi-agent system using Strands Agents patterns (Supervisor-Agent model)
 - Amazon Bedrock for foundation models (Claude 3 Sonnet, Amazon Nova)
 - Model Context Protocol (MCP) for tool integration
 - Agent-to-Agent (A2A) communication for specialist agents
 - Amazon Bedrock AgentCore for production deployment
+- Streamlit for rapid UI development
 
 ---
 
 ## Phase 1: Foundation & Strands Agents Setup
 
 - [ ] 1. Initialize project structure with Strands Agents
-  - Install Strands Agents SDK (`pip install strands-agents`)
-  - Create React.js frontend with TypeScript and Vite
-  - Set up AWS CDK project for infrastructure as code
+  - Install Strands Agents SDK (`pip install strands-agents strands-agents-tools`)
+  - Install Streamlit for frontend (`pip install streamlit`)
+  - Set up AWS CDK project for infrastructure as code (optional for hackathon)
   - Configure AWS credentials and Amazon Bedrock access
   - Initialize Git repository with proper .gitignore
   - Set up Python virtual environment for agent development
+  - Create basic project structure (agents/, tools/, app.py, requirements.txt)
   - _Requirements: Technical Constraints - Platform Constraints_
   - _Reference: [Strands Agents Quickstart](https://github.com/awslabs/strands-agents)_
 
