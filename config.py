@@ -37,6 +37,7 @@ class Config:
     DYNAMODB_RESOURCE_SHARING_TABLE = os.getenv("DYNAMODB_RESOURCE_SHARING_TABLE", "RISE-ResourceSharing")
     DYNAMODB_BUYING_GROUPS_TABLE = os.getenv("DYNAMODB_BUYING_GROUPS_TABLE", "RISE-BuyingGroups")
     DYNAMODB_RESOURCE_BOOKINGS_TABLE = os.getenv("DYNAMODB_RESOURCE_BOOKINGS_TABLE", "RISE-ResourceBookings")
+    DYNAMODB_MARKET_PRICES_TABLE = os.getenv("DYNAMODB_MARKET_PRICES_TABLE", "RISE-MarketPrices")
     
     # S3 Buckets
     S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "rise-application-data")

@@ -325,6 +325,104 @@ class RiseStack(Stack):
             ),
             projection_type=dynamodb.ProjectionType.ALL
         )
+        
+        # Weather Forecast Table
+        self.weather_forecast_table = dynamodb.Table(
+            self, "WeatherForecastTable",
+            table_name="RISE-WeatherForecast",
+            partition_key=dynamodb.Attribute(
+                name="cache_key",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+            time_to_live_attribute="ttl",  # Enable TTL for automatic cache cleanup
+        )
+        
+        # Market Prices Table
+        self.market_prices_table = dynamodb.Table(
+            self, "MarketPricesTable",
+            table_name="RISE-MarketPrices",
+            partition_key=dynamodb.Attribute(
+                name="crop_market_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="timestamp",
+                type=dynamodb.AttributeType.NUMBER
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+            time_to_live_attribute="ttl",  # Enable TTL for automatic data cleanup
+        )
+        
+        # Add GSI for cache lookups
+        self.market_prices_table.add_global_secondary_index(
+            index_name="CacheKeyIndex",
+            partition_key=dynamodb.Attribute(
+                name="cache_key",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        
+        # Government Schemes Table
+        self.government_schemes_table = dynamodb.Table(
+            self, "GovernmentSchemesTable",
+            table_name="RISE-GovernmentSchemes",
+            partition_key=dynamodb.Attribute(
+                name="scheme_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+        )
+        
+        # Add GSIs for Government Schemes
+        self.government_schemes_table.add_global_secondary_index(
+            index_name="StateSchemeIndex",
+            partition_key=dynamodb.Attribute(
+                name="state",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="scheme_type",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        
+        self.government_schemes_table.add_global_secondary_index(
+            index_name="CategorySchemeIndex",
+            partition_key=dynamodb.Attribute(
+                name="category",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="benefit_amount",
+                type=dynamodb.AttributeType.NUMBER
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        
+        self.government_schemes_table.add_global_secondary_index(
+            index_name="DeadlineSchemeIndex",
+            partition_key=dynamodb.Attribute(
+                name="active_status",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="application_deadline",
+                type=dynamodb.AttributeType.NUMBER
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
 
     def _create_s3_buckets(self):
         """Create S3 buckets with lifecycle policies"""
@@ -624,6 +722,9 @@ class RiseStack(Stack):
         self.buying_groups_table.grant_read_write_data(self.bedrock_execution_role)
         self.resource_bookings_table.grant_read_write_data(self.bedrock_execution_role)
         self.conversation_history_table.grant_read_write_data(self.bedrock_execution_role)
+        self.weather_forecast_table.grant_read_write_data(self.bedrock_execution_role)
+        self.market_prices_table.grant_read_write_data(self.bedrock_execution_role)
+        self.government_schemes_table.grant_read_write_data(self.bedrock_execution_role)
         
         # Grant S3 access
         self.app_data_bucket.grant_read_write(self.bedrock_execution_role)
