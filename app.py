@@ -39,6 +39,42 @@ LANGUAGE_MAP = {
 }
 
 # Agricultural theme CSS
+def inject_offline_support():
+    """Inject offline support scripts and service worker"""
+    from infrastructure.offline_storage import get_storage_manager
+    from infrastructure.sync_manager import get_sync_manager
+    
+    storage_manager = get_storage_manager()
+    sync_manager = get_sync_manager()
+    
+    # Inject IndexedDB initialization
+    st.components.v1.html(storage_manager.generate_indexeddb_init_script(), height=0)
+    
+    # Inject sync manager
+    st.components.v1.html(sync_manager.generate_sync_script(), height=0)
+    
+    # Inject storage stats checker
+    st.components.v1.html(storage_manager.generate_storage_check_script(), height=0)
+    
+    # Register service worker
+    service_worker_script = """
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/static/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered:', registration);
+                })
+                .catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
+        });
+    }
+    </script>
+    """
+    st.components.v1.html(service_worker_script, height=0)
+
+
 def apply_custom_css():
     """Apply custom CSS for agricultural theme"""
     st.markdown("""
@@ -291,6 +327,17 @@ def render_sidebar():
         
         st.divider()
         
+        # Offline indicator and features
+        from ui.offline_indicator import render_offline_features_info, render_storage_stats
+        render_offline_features_info(st.session_state.language)
+        
+        st.divider()
+        
+        # Storage stats
+        render_storage_stats()
+        
+        st.divider()
+        
         # Language selector
         st.markdown("### 🌐 Language / भाषा")
         
@@ -378,6 +425,13 @@ def render_sidebar():
 
 def render_chat_interface():
     """Render main chat interface"""
+    
+    # Inject offline support
+    inject_offline_support()
+    
+    # Render offline indicator
+    from ui.offline_indicator import render_offline_indicator
+    render_offline_indicator(st.session_state.language)
     
     # Header
     st.markdown('<div class="main-header">', unsafe_allow_html=True)

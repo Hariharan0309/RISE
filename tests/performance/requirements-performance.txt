@@ -1,0 +1,172 @@
+# Performance Testing Dependencies for RISE
+
+# Load testing framework
+locust==2.17.0
+
+# HTTP client for API testing
+requests==2.31.0
+aiohttp==3.9.1
+
+# AWS SDK for service testing
+boto3==1.34.0
+botocore==1.34.0
+
+# Performance profiling
+memory-profiler==0.61.0
+py-spy==0.3.14
+line-profiler==4.1.1
+
+# Network simulation and throttling
+netem==0.1.0
+tc-netem==0.1.1
+
+# Browser automation for frontend testing
+selenium==4.15.2
+playwright==1.40.0
+
+# Metrics collection and analysis
+prometheus-client==0.19.0
+statsd==4.0.1
+
+# Time series data handling
+pandas==2.1.4
+numpy==1.26.2
+
+# Visualization and reporting
+matplotlib==3.8.2
+plotly==5.18.0
+jinja2==3.1.2
+
+# Statistical analysis
+scipy==1.11.4
+
+# Testing framework
+pytest==7.4.3
+pytest-benchmark==4.0.0
+pytest-timeout==2.2.0
+pytest-xdist==3.5.0
+
+# Mocking and fixtures
+responses==0.24.1
+moto[all]==4.2.14
+
+# Image processing for bundle analysis
+Pillow==10.1.0
+
+# Compression analysis
+brotli==1.1.0
+zstandard==0.22.0
+
+# JSON handling
+orjson==3.9.10
+
+# Environment management
+python-dotenv==1.0.0
+
+# Logging and monitoring
+structlog==23.2.0
+
+# Report generation
+reportlab==4.0.7
+weasyprint==60.1
+
+# Database performance testing
+psycopg2-binary==2.9.9
+
+# Redis for cache testing
+redis==5.0.1
+
+# WebSocket testing
+websocket-client==1.7.0
+
+# Network utilities
+ping3==4.0.4
+speedtest-cli==2.1.3
+
+# System monitoring
+psutil==5.9.6
+
+# Date/time utilities
+python-dateutil==2.8.2
+
+# Configuration management
+pyyaml==6.0.1
+
+# CLI utilities
+click==8.1.7
+rich==13.7.0
+
+# Concurrent testing
+gevent==23.9.1
+greenlet==3.0.1
+
+# API testing
+tavern==2.4.1
+
+# Performance data storage
+influxdb-client==1.38.0
+
+# HTML parsing for frontend analysis
+beautifulsoup4==4.12.2
+lxml==4.9.3
+
+# JavaScript execution for bundle analysis
+PyExecJS==1.5.1
+
+# File size analysis
+humanize==4.9.0
+
+# Network packet analysis
+scapy==2.5.0
+
+# SSL/TLS testing
+pyOpenSSL==23.3.0
+
+# DNS testing
+dnspython==2.4.2
+
+# HTTP/2 support
+httpx==0.25.2
+h2==4.1.0
+
+# Async utilities
+asyncio==3.4.3
+
+# Test data generation
+faker==20.1.0
+
+# Color output
+colorama==0.4.6
+
+# Progress bars
+tqdm==4.66.1
+
+# JSON schema validation
+jsonschema==4.20.0
+
+# URL parsing
+urllib3==2.1.0
+
+# Retry logic
+tenacity==8.2.3
+
+# Rate limiting
+ratelimit==2.2.1
+
+# Caching utilities
+cachetools==5.3.2
+
+# Timezone handling
+pytz==2023.3.post1
+
+# UUID utilities
+shortuuid==1.0.11
+
+# Hash utilities
+xxhash==3.4.1
+
+# Compression benchmarking
+zlib-ng==0.2.1
+
+# Network bandwidth testing
+iperf3==0.1.11

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RISE - Offline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #2E7D32 0%, #66BB6A 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .offline-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .offline-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 {
+            color: #2E7D32;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        
+        .features {
+            background: #F1F8E9;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .features h3 {
+            color: #2E7D32;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .features ul {
+            list-style: none;
+        }
+        
+        .features li {
+            padding: 0.5rem 0;
+            color: #555;
+        }
+        
+        .features li:before {
+            content: "✓ ";
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        .retry-button {
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .retry-button:hover {
+            background: #1B5E20;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .status {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #FFF3E0;
+            border-radius: 10px;
+            color: #F57C00;
+            font-weight: 600;
+        }
+        
+        .multilingual {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📡</div>
+        
+        <h1>You're Offline</h1>
+        <h2 style="color: #666; font-size: 1.2rem; margin-bottom: 1rem;">
+            आप ऑफ़लाइन हैं | நீங்கள் ஆஃப்லைனில் உள்ளீர்கள்
+        </h2>
+        
+        <p>
+            No internet connection detected. Don't worry, RISE still works offline with limited features!
+        </p>
+        
+        <div class="features">
+            <h3>Available Offline:</h3>
+            <ul>
+                <li>View your diagnosis history</li>
+                <li>Access cached weather information</li>
+                <li>Check saved market prices</li>
+                <li>Read forum posts (read-only)</li>
+                <li>View your profile and settings</li>
+                <li>Record voice queries (will sync later)</li>
+            </ul>
+        </div>
+        
+        <button class="retry-button" onclick="retryConnection()">
+            🔄 Retry Connection
+        </button>
+        
+        <div class="status" id="status">
+            Checking connection...
+        </div>
+        
+        <div class="multilingual">
+            <p>
+                <strong>हिंदी:</strong> कनेक्शन बहाल होने पर स्वचालित रूप से सिंक हो जाएगा<br>
+                <strong>தமிழ்:</strong> இணைப்பு மீட்டமைக்கப்படும்போது தானாகவே ஒத்திசைக்கப்படும்
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function checkConnection() {
+            const status = document.getElementById('status');
+            
+            if (navigator.onLine) {
+                status.style.background = '#E8F5E9';
+                status.style.color = '#2E7D32';
+                status.textContent = '✓ Connection restored! Redirecting...';
+                
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } else {
+                status.style.background = '#FFF3E0';
+                status.style.color = '#F57C00';
+                status.textContent = '⚠ Still offline. Please check your connection.';
+            }
+        }
+        
+        function retryConnection() {
+            checkConnection();
+        }
+        
+        // Auto-check connection every 5 seconds
+        setInterval(checkConnection, 5000);
+        
+        // Listen for online event
+        window.addEventListener('online', () => {
+            checkConnection();
+        });
+        
+        // Initial check
+        checkConnection();
+    </script>
+</body>
+</html>

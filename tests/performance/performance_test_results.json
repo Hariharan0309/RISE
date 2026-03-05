@@ -1,0 +1,20 @@
+{
+  "start_time": 1772734534.4296803,
+  "test_results": {
+    "response_time": {
+      "tests_run": 12,
+      "failures": 0,
+      "errors": 0,
+      "success": true
+    },
+    "offline": {
+      "tests_run": 6,
+      "failures": 0,
+      "errors": 0,
+      "success": true
+    }
+  },
+  "summary": {},
+  "end_time": 1772734542.2030573,
+  "total_duration": 7.773376941680908
+}
