@@ -111,6 +111,12 @@ def apply_custom_css():
         padding: 1rem;
         margin: 0.5rem 0;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        color: #000000 !important;
+    }
+    
+    /* Force text color in chat messages */
+    .stChatMessage p, .stChatMessage div, .stChatMessage span {
+        color: #000000 !important;
     }
     
     /* User message */
@@ -495,73 +501,59 @@ def render_chat_tab():
             "timestamp": timestamp
         })
         
-        # Display user message
-        with st.chat_message("user"):
-            st.markdown(user_input)
-            st.caption(f"🕐 {timestamp}")
-        
         # Get AI response
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking... / सोच रहा हूँ..."):
-                try:
-                    if st.session_state.orchestrator and st.session_state.session_id:
-                        # Process query with orchestrator
-                        response = st.session_state.orchestrator.process_query(
-                            session_id=st.session_state.session_id,
-                            query=user_input,
-                            context={
-                                "location": st.session_state.location,
-                                "crops": st.session_state.crops
-                            }
-                        )
-                        
-                        if response["success"]:
-                            response_text = response["response"]
-                            duration = response.get("duration_ms", 0)
-                            
-                            st.markdown(response_text)
-                            st.caption(f"🕐 {timestamp} • ⚡ {duration:.0f}ms")
-                            
-                            # Add to chat history
-                            st.session_state.chat_history.append({
-                                "role": "assistant",
-                                "content": response_text,
-                                "timestamp": timestamp
-                            })
-                        else:
-                            error_msg = response.get("error", "Unknown error occurred")
-                            st.error(f"Error: {error_msg}")
-                            st.session_state.chat_history.append({
-                                "role": "assistant",
-                                "content": f"⚠️ Error: {error_msg}",
-                                "timestamp": timestamp
-                            })
-                    else:
-                        # Fallback response when orchestrator is not available
-                        fallback_msg = """I apologize, but the AI assistant is currently unavailable. 
-                        
+        try:
+            if st.session_state.orchestrator and st.session_state.session_id:
+                # Process query with orchestrator
+                response = st.session_state.orchestrator.process_query(
+                    session_id=st.session_state.session_id,
+                    query=user_input,
+                    context={
+                        "location": st.session_state.location,
+                        "crops": st.session_state.crops
+                    }
+                )
+                
+                if response["success"]:
+                    response_text = response["response"]
+                    
+                    # Add to chat history
+                    st.session_state.chat_history.append({
+                        "role": "assistant",
+                        "content": response_text,
+                        "timestamp": timestamp
+                    })
+                else:
+                    error_msg = response.get("error", "Unknown error occurred")
+                    st.session_state.chat_history.append({
+                        "role": "assistant",
+                        "content": f"⚠️ Error: {error_msg}",
+                        "timestamp": timestamp
+                    })
+            else:
+                # Fallback response when orchestrator is not available
+                fallback_msg = """I apologize, but the AI assistant is currently unavailable. 
+                
 Please ensure:
 1. AWS credentials are configured in `.env` file
 2. Amazon Bedrock access is enabled
 3. The orchestrator agent is properly initialized
 
 For now, I can provide general information, but advanced AI features require proper AWS setup."""
-                        
-                        st.warning(fallback_msg)
-                        st.session_state.chat_history.append({
-                            "role": "assistant",
-                            "content": fallback_msg,
-                            "timestamp": timestamp
-                        })
                 
-                except Exception as e:
-                    error_msg = f"An error occurred: {str(e)}"
-                    st.error(error_msg)
-                    st.session_state.chat_history.append({
-                        "role": "assistant",
-                        "content": f"⚠️ {error_msg}",
-                        "timestamp": timestamp
-                    })
+                st.session_state.chat_history.append({
+                    "role": "assistant",
+                    "content": fallback_msg,
+                    "timestamp": timestamp
+                })
+        
+        except Exception as e:
+            error_msg = f"An error occurred: {str(e)}"
+            st.session_state.chat_history.append({
+                "role": "assistant",
+                "content": f"⚠️ {error_msg}",
+                "timestamp": timestamp
+            })
         
         # Rerun to update chat display
         st.rerun()

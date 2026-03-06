@@ -123,10 +123,14 @@ class RISEOrchestrator:
                 'region_name': self.config.BEDROCK_REGION
             }
             
-            # Add credentials if provided
+            # Add credentials if provided (including session token for temporary credentials)
             if self.config.AWS_ACCESS_KEY_ID and self.config.AWS_SECRET_ACCESS_KEY:
                 bedrock_kwargs['aws_access_key_id'] = self.config.AWS_ACCESS_KEY_ID
                 bedrock_kwargs['aws_secret_access_key'] = self.config.AWS_SECRET_ACCESS_KEY
+                
+                # Add session token if available (for temporary credentials)
+                if self.config.AWS_SESSION_TOKEN:
+                    bedrock_kwargs['aws_session_token'] = self.config.AWS_SESSION_TOKEN
             
             self.bedrock_client = boto3.client(**bedrock_kwargs)
             logger.info(f"AWS Bedrock client initialized in region {self.config.BEDROCK_REGION}")
@@ -150,6 +154,55 @@ class RISEOrchestrator:
         except Exception as e:
             logger.warning(f"Could not initialize context tools: {e}")
             self.context_tools = None
+    
+    def _store_user_profile(self, user_id: str, language: str, metadata: Optional[Dict[str, Any]] = None):
+        """Store or update user profile in DynamoDB"""
+        try:
+            import boto3
+            from datetime import datetime
+            
+            dynamodb = boto3.resource('dynamodb', region_name=self.config.AWS_REGION)
+            table = dynamodb.Table('RISE-UserProfiles')
+            
+            # Check if profile exists
+            try:
+                response = table.get_item(Key={'user_id': user_id})
+                existing_profile = response.get('Item', {})
+            except:
+                existing_profile = {}
+            
+            # Prepare profile data
+            profile = {
+                'user_id': user_id,
+                'preferred_language': language,
+                'last_active': datetime.utcnow().isoformat(),
+                'updated_at': datetime.utcnow().isoformat()
+            }
+            
+            # Add metadata if provided
+            if metadata:
+                if 'name' in metadata:
+                    profile['name'] = metadata['name']
+                if 'phone' in metadata or 'phone_number' in metadata:
+                    profile['phone_number'] = metadata.get('phone') or metadata.get('phone_number')
+                if 'location' in metadata:
+                    profile['location'] = metadata['location']
+                if 'crops' in metadata:
+                    profile['crops'] = metadata['crops']
+            
+            # Preserve created_at if it exists
+            if 'created_at' in existing_profile:
+                profile['created_at'] = existing_profile['created_at']
+            else:
+                profile['created_at'] = datetime.utcnow().isoformat()
+            
+            # Store in DynamoDB
+            table.put_item(Item=profile)
+            logger.info(f"User profile stored/updated for {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Error storing user profile: {e}")
+            raise
     
     def _init_agent(self):
         """Initialize Strands agent with comprehensive system prompt and Bedrock model"""
@@ -246,6 +299,12 @@ You are a trusted partner in the farmer's journey toward better yields, fair pri
                 "context": metadata or {},
                 "message_count": 0
             }
+            
+            # Store/update user profile in DynamoDB
+            try:
+                self._store_user_profile(user_id, language, metadata)
+            except Exception as e:
+                logger.warning(f"Failed to store user profile: {e}")
             
             # Record metrics
             if self.session_counter:
@@ -425,10 +484,64 @@ You are a trusted partner in the farmer's journey toward better yields, fair pri
                 # Process with Strands agent
                 logger.info(f"Processing query for session {session_id}: {query[:100]}...")
                 
-                # Enhance query with context for better responses
+                # Language mapping for display names
+                language_names = {
+                    'en': 'English',
+                    'hi': 'Hindi (हिंदी)',
+                    'ta': 'Tamil (தமிழ்)',
+                    'te': 'Telugu (తెలుగు)',
+                    'kn': 'Kannada (ಕನ್ನಡ)',
+                    'bn': 'Bengali (বাংলা)',
+                    'gu': 'Gujarati (ગુજરાતી)',
+                    'mr': 'Marathi (मराठी)',
+                    'pa': 'Punjabi (ਪੰਜਾਬੀ)'
+                }
+                
+                # Enhance query with context and language instruction
+                logger.info(f"Session language: {session['language']}")
+                
                 enhanced_query = query
-                if conversation_context and conversation_context != "No previous conversation context.":
-                    enhanced_query = f"{conversation_context}\n\nCurrent question: {query}"
+                
+                # For languages other than English and Hindi, use translation
+                # Claude Haiku has limited support for Tamil, Telugu, Kannada, etc.
+                use_translation = session["language"] not in ["en", "hi"]
+                
+                if use_translation:
+                    logger.info(f"Using translation for language: {session['language']}")
+                    # Translate query to English for processing
+                    from tools.translation_tools import TranslationTools
+                    translation_tools = TranslationTools(
+                        region=self.config.BEDROCK_REGION,
+                        enable_caching=True
+                    )
+                    
+                    query_translation = translation_tools.translate_with_fallback(
+                        text=query,
+                        target_language='en',
+                        source_language=session["language"],
+                        fallback_language='hi'
+                    )
+                    
+                    if query_translation['success']:
+                        enhanced_query = query_translation['translated_text']
+                        logger.info(f"Translated query: {enhanced_query}")
+                
+                elif session["language"] == "hi":
+                    # For Hindi, add instruction
+                    language_name = language_names.get(session["language"], session["language"])
+                    logger.info(f"Adding language instruction for: {language_name}")
+                    
+                    enhanced_query = f"""You must respond in {language_name} language only. Do not use English.
+
+Question: {query}
+
+Remember: Your response must be entirely in {language_name}."""
+                
+                # Only add conversation context if it exists and is meaningful
+                if conversation_context and conversation_context != "No previous conversation context." and len(conversation_context.strip()) > 0:
+                    # Don't prepend full context - let the agent use it from memory
+                    logger.info(f"Conversation context available: {len(conversation_context)} chars")
+                    # The context is already in the agent's memory, no need to repeat it
                 
                 # Run the agent using invoke_async (Strands uses async by default)
                 import asyncio
@@ -446,12 +559,28 @@ You are a trusted partner in the farmer's journey toward better yields, fair pri
                 )
                 
                 # Extract response text from agent response
-                if hasattr(agent_response, 'content'):
+                logger.info(f"Agent response type: {type(agent_response)}")
+                
+                # Strands AgentResult has a message attribute with content
+                if hasattr(agent_response, 'message') and isinstance(agent_response.message, dict):
+                    content = agent_response.message.get('content', [])
+                    if content and isinstance(content, list) and len(content) > 0:
+                        response_text = content[0].get('text', str(agent_response))
+                    else:
+                        response_text = str(agent_response)
+                elif hasattr(agent_response, 'content'):
                     response_text = agent_response.content
                 elif isinstance(agent_response, str):
                     response_text = agent_response
+                elif hasattr(agent_response, 'output'):
+                    response_text = agent_response.output
+                elif isinstance(agent_response, dict) and 'output' in agent_response:
+                    response_text = agent_response['output']
                 else:
+                    # Fallback to string conversion (which works based on debug output)
                     response_text = str(agent_response)
+                
+                logger.info(f"Extracted response text: {response_text[:200] if response_text else 'None'}...")
                 
                 # Add response to in-memory conversation history
                 session["conversation_history"].append({

@@ -19,13 +19,16 @@ logger = logging.getLogger(__name__)
 class DiseaseIdentificationTools:
     """Crop disease identification tools using Amazon Bedrock multimodal"""
     
-    def __init__(self, region: str = "us-east-1"):
+    def __init__(self, region: str = "us-east-1", model_id: str = None):
         """
         Initialize disease identification tools
         
         Args:
             region: AWS region for services
+            model_id: Bedrock model ID to use (defaults to config value)
         """
+        from config import Config
+        
         self.region = region
         self.bedrock_runtime = boto3.client('bedrock-runtime', region_name=region)
         self.s3_client = boto3.client('s3', region_name=region)
@@ -34,13 +37,16 @@ class DiseaseIdentificationTools:
         # DynamoDB table for diagnosis history
         self.diagnosis_table = self.dynamodb.Table('RISE-DiagnosisHistory')
         
-        # Model configuration
-        self.model_id = 'anthropic.claude-3-sonnet-20240229-v1:0'
+        # Model configuration - use provided model_id or fall back to config
+        self.model_id = model_id or Config.BEDROCK_MODEL_ID
+        
+        # S3 bucket name from config
+        self.s3_bucket = Config.S3_BUCKET_NAME
         
         # Severity levels
         self.severity_levels = ['low', 'medium', 'high', 'critical']
         
-        logger.info(f"Disease identification tools initialized in region {region}")
+        logger.info(f"Disease identification tools initialized in region {region} with model {self.model_id}")
     
     def compress_image(self, image_data: bytes, max_size_kb: int = 500) -> bytes:
         """
@@ -181,10 +187,10 @@ class DiseaseIdentificationTools:
             # Build prompt for disease identification
             prompt = self._build_disease_identification_prompt(crop_type, additional_context)
             
-            # Call Bedrock with multimodal input
-            response = self.bedrock_runtime.invoke_model(
-                modelId=self.model_id,
-                body=json.dumps({
+            # Prepare request body based on model type
+            if 'claude' in self.model_id.lower():
+                # Claude API format
+                request_body = {
                     'anthropic_version': 'bedrock-2023-05-31',
                     'max_tokens': 2000,
                     'messages': [
@@ -206,13 +212,81 @@ class DiseaseIdentificationTools:
                             ]
                         }
                     ],
-                    'temperature': 0.3  # Lower temperature for more consistent medical-style diagnosis
-                })
+                    'temperature': 0.3
+                }
+            elif 'nova' in self.model_id.lower():
+                # Nova API format
+                request_body = {
+                    'messages': [
+                        {
+                            'role': 'user',
+                            'content': [
+                                {
+                                    'image': {
+                                        'format': 'jpeg',
+                                        'source': {
+                                            'bytes': image_base64
+                                        }
+                                    }
+                                },
+                                {
+                                    'text': prompt
+                                }
+                            ]
+                        }
+                    ],
+                    'inferenceConfig': {
+                        'max_new_tokens': 2000,
+                        'temperature': 0.3
+                    }
+                }
+            else:
+                # Default to Claude format
+                request_body = {
+                    'anthropic_version': 'bedrock-2023-05-31',
+                    'max_tokens': 2000,
+                    'messages': [
+                        {
+                            'role': 'user',
+                            'content': [
+                                {
+                                    'type': 'image',
+                                    'source': {
+                                        'type': 'base64',
+                                        'media_type': 'image/jpeg',
+                                        'data': image_base64
+                                    }
+                                },
+                                {
+                                    'type': 'text',
+                                    'text': prompt
+                                }
+                            ]
+                        }
+                    ],
+                    'temperature': 0.3
+                }
+            
+            # Call Bedrock with multimodal input
+            response = self.bedrock_runtime.invoke_model(
+                modelId=self.model_id,
+                body=json.dumps(request_body)
             )
             
-            # Parse response
+            # Parse response based on model type
             response_body = json.loads(response['body'].read())
-            analysis_text = response_body['content'][0]['text']
+            
+            if 'claude' in self.model_id.lower():
+                analysis_text = response_body['content'][0]['text']
+            elif 'nova' in self.model_id.lower():
+                # Nova response format
+                analysis_text = response_body['output']['message']['content'][0]['text']
+            else:
+                # Try Claude format first, fall back to Nova
+                try:
+                    analysis_text = response_body['content'][0]['text']
+                except (KeyError, IndexError):
+                    analysis_text = response_body['output']['message']['content'][0]['text']
             
             # Parse structured diagnosis from response
             diagnosis = self._parse_diagnosis_response(analysis_text)
@@ -223,7 +297,7 @@ class DiseaseIdentificationTools:
             # Store image in S3
             s3_key = f"images/crop-photos/{user_id}/{diagnosis_id}.jpg"
             self.s3_client.put_object(
-                Bucket='rise-application-data',
+                Bucket=self.s3_bucket,
                 Key=s3_key,
                 Body=compressed_image,
                 ContentType='image/jpeg',
@@ -415,12 +489,25 @@ If the image quality is poor or the crop is not clearly visible, indicate what s
                         crop_type: Optional[str]) -> None:
         """Store diagnosis in DynamoDB"""
         try:
+            from decimal import Decimal
+            
+            # Convert float values to Decimal for DynamoDB
+            def convert_floats(obj):
+                """Recursively convert floats to Decimal"""
+                if isinstance(obj, float):
+                    return Decimal(str(obj))
+                elif isinstance(obj, dict):
+                    return {k: convert_floats(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [convert_floats(item) for item in obj]
+                return obj
+            
             item = {
                 'diagnosis_id': diagnosis_id,
                 'user_id': user_id,
                 'image_s3_key': s3_key,
-                'diagnosis_result': diagnosis,
-                'confidence_score': diagnosis.get('confidence_score', 0.0),
+                'diagnosis_result': convert_floats(diagnosis),
+                'confidence_score': Decimal(str(diagnosis.get('confidence_score', 0.0))),
                 'severity': diagnosis.get('severity', 'unknown'),
                 'diseases': diagnosis.get('diseases', []),
                 'crop_type': crop_type or 'unknown',
@@ -428,11 +515,40 @@ If the image quality is poor or the crop is not clearly visible, indicate what s
                 'created_timestamp': int(datetime.now().timestamp())
             }
             
+            logger.info(f"Attempting to store diagnosis: {diagnosis_id} for user: {user_id}")
             self.diagnosis_table.put_item(Item=item)
-            logger.info(f"Diagnosis stored: {diagnosis_id}")
+            logger.info(f"✅ Diagnosis stored successfully: {diagnosis_id}")
         
         except Exception as e:
-            logger.error(f"Error storing diagnosis: {e}")
+            logger.error(f"❌ Error storing diagnosis: {e}", exc_info=True)
+            # Re-raise to make the error visible
+            raise
+    
+    def generate_presigned_url(self, s3_key: str, expiration: int = 3600) -> Optional[str]:
+        """
+        Generate a presigned URL for viewing an image from S3
+        
+        Args:
+            s3_key: S3 object key
+            expiration: URL expiration time in seconds (default: 1 hour)
+        
+        Returns:
+            Presigned URL string or None if error
+        """
+        try:
+            url = self.s3_client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': self.s3_bucket,
+                    'Key': s3_key
+                },
+                ExpiresIn=expiration
+            )
+            logger.info(f"Generated presigned URL for {s3_key}")
+            return url
+        except Exception as e:
+            logger.error(f"Error generating presigned URL: {e}")
+            return None
     
     def get_diagnosis_history(self, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
         """

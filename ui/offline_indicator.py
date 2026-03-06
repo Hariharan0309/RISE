@@ -3,6 +3,7 @@ RISE Offline Indicator UI Component
 Displays online/offline status and sync progress
 """
 
+import json
 import streamlit as st
 from typing import Optional
 
