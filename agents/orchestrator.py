@@ -425,10 +425,64 @@ You are a trusted partner in the farmer's journey toward better yields, fair pri
                 # Process with Strands agent
                 logger.info(f"Processing query for session {session_id}: {query[:100]}...")
                 
-                # Enhance query with context for better responses
+                # Language mapping for display names
+                language_names = {
+                    'en': 'English',
+                    'hi': 'Hindi (हिंदी)',
+                    'ta': 'Tamil (தமிழ்)',
+                    'te': 'Telugu (తెలుగు)',
+                    'kn': 'Kannada (ಕನ್ನಡ)',
+                    'bn': 'Bengali (বাংলা)',
+                    'gu': 'Gujarati (ગુજરાતી)',
+                    'mr': 'Marathi (मराठी)',
+                    'pa': 'Punjabi (ਪੰਜਾਬੀ)'
+                }
+                
+                # Enhance query with context and language instruction
+                logger.info(f"Session language: {session['language']}")
+                
                 enhanced_query = query
-                if conversation_context and conversation_context != "No previous conversation context.":
-                    enhanced_query = f"{conversation_context}\n\nCurrent question: {query}"
+                
+                # For languages other than English and Hindi, use translation
+                # Claude Haiku has limited support for Tamil, Telugu, Kannada, etc.
+                use_translation = session["language"] not in ["en", "hi"]
+                
+                if use_translation:
+                    logger.info(f"Using translation for language: {session['language']}")
+                    # Translate query to English for processing
+                    from tools.translation_tools import TranslationTools
+                    translation_tools = TranslationTools(
+                        region=self.config.BEDROCK_REGION,
+                        enable_caching=True
+                    )
+                    
+                    query_translation = translation_tools.translate_with_fallback(
+                        text=query,
+                        target_language='en',
+                        source_language=session["language"],
+                        fallback_language='hi'
+                    )
+                    
+                    if query_translation['success']:
+                        enhanced_query = query_translation['translated_text']
+                        logger.info(f"Translated query: {enhanced_query}")
+                
+                elif session["language"] == "hi":
+                    # For Hindi, add instruction
+                    language_name = language_names.get(session["language"], session["language"])
+                    logger.info(f"Adding language instruction for: {language_name}")
+                    
+                    enhanced_query = f"""You must respond in {language_name} language only. Do not use English.
+
+Question: {query}
+
+Remember: Your response must be entirely in {language_name}."""
+                
+                # Only add conversation context if it exists and is meaningful
+                if conversation_context and conversation_context != "No previous conversation context." and len(conversation_context.strip()) > 0:
+                    # Don't prepend full context - let the agent use it from memory
+                    logger.info(f"Conversation context available: {len(conversation_context)} chars")
+                    # The context is already in the agent's memory, no need to repeat it
                 
                 # Run the agent using invoke_async (Strands uses async by default)
                 import asyncio
@@ -446,12 +500,28 @@ You are a trusted partner in the farmer's journey toward better yields, fair pri
                 )
                 
                 # Extract response text from agent response
-                if hasattr(agent_response, 'content'):
+                logger.info(f"Agent response type: {type(agent_response)}")
+                
+                # Strands AgentResult has a message attribute with content
+                if hasattr(agent_response, 'message') and isinstance(agent_response.message, dict):
+                    content = agent_response.message.get('content', [])
+                    if content and isinstance(content, list) and len(content) > 0:
+                        response_text = content[0].get('text', str(agent_response))
+                    else:
+                        response_text = str(agent_response)
+                elif hasattr(agent_response, 'content'):
                     response_text = agent_response.content
                 elif isinstance(agent_response, str):
                     response_text = agent_response
+                elif hasattr(agent_response, 'output'):
+                    response_text = agent_response.output
+                elif isinstance(agent_response, dict) and 'output' in agent_response:
+                    response_text = agent_response['output']
                 else:
+                    # Fallback to string conversion (which works based on debug output)
                     response_text = str(agent_response)
+                
+                logger.info(f"Extracted response text: {response_text[:200] if response_text else 'None'}...")
                 
                 # Add response to in-memory conversation history
                 session["conversation_history"].append({
