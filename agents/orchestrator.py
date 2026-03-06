@@ -123,10 +123,14 @@ class RISEOrchestrator:
                 'region_name': self.config.BEDROCK_REGION
             }
             
-            # Add credentials if provided
+            # Add credentials if provided (including session token for temporary credentials)
             if self.config.AWS_ACCESS_KEY_ID and self.config.AWS_SECRET_ACCESS_KEY:
                 bedrock_kwargs['aws_access_key_id'] = self.config.AWS_ACCESS_KEY_ID
                 bedrock_kwargs['aws_secret_access_key'] = self.config.AWS_SECRET_ACCESS_KEY
+                
+                # Add session token if available (for temporary credentials)
+                if self.config.AWS_SESSION_TOKEN:
+                    bedrock_kwargs['aws_session_token'] = self.config.AWS_SESSION_TOKEN
             
             self.bedrock_client = boto3.client(**bedrock_kwargs)
             logger.info(f"AWS Bedrock client initialized in region {self.config.BEDROCK_REGION}")
@@ -150,6 +154,55 @@ class RISEOrchestrator:
         except Exception as e:
             logger.warning(f"Could not initialize context tools: {e}")
             self.context_tools = None
+    
+    def _store_user_profile(self, user_id: str, language: str, metadata: Optional[Dict[str, Any]] = None):
+        """Store or update user profile in DynamoDB"""
+        try:
+            import boto3
+            from datetime import datetime
+            
+            dynamodb = boto3.resource('dynamodb', region_name=self.config.AWS_REGION)
+            table = dynamodb.Table('RISE-UserProfiles')
+            
+            # Check if profile exists
+            try:
+                response = table.get_item(Key={'user_id': user_id})
+                existing_profile = response.get('Item', {})
+            except:
+                existing_profile = {}
+            
+            # Prepare profile data
+            profile = {
+                'user_id': user_id,
+                'preferred_language': language,
+                'last_active': datetime.utcnow().isoformat(),
+                'updated_at': datetime.utcnow().isoformat()
+            }
+            
+            # Add metadata if provided
+            if metadata:
+                if 'name' in metadata:
+                    profile['name'] = metadata['name']
+                if 'phone' in metadata or 'phone_number' in metadata:
+                    profile['phone_number'] = metadata.get('phone') or metadata.get('phone_number')
+                if 'location' in metadata:
+                    profile['location'] = metadata['location']
+                if 'crops' in metadata:
+                    profile['crops'] = metadata['crops']
+            
+            # Preserve created_at if it exists
+            if 'created_at' in existing_profile:
+                profile['created_at'] = existing_profile['created_at']
+            else:
+                profile['created_at'] = datetime.utcnow().isoformat()
+            
+            # Store in DynamoDB
+            table.put_item(Item=profile)
+            logger.info(f"User profile stored/updated for {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Error storing user profile: {e}")
+            raise
     
     def _init_agent(self):
         """Initialize Strands agent with comprehensive system prompt and Bedrock model"""
@@ -246,6 +299,12 @@ You are a trusted partner in the farmer's journey toward better yields, fair pri
                 "context": metadata or {},
                 "message_count": 0
             }
+            
+            # Store/update user profile in DynamoDB
+            try:
+                self._store_user_profile(user_id, language, metadata)
+            except Exception as e:
+                logger.warning(f"Failed to store user profile: {e}")
             
             # Record metrics
             if self.session_counter:
