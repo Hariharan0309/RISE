@@ -13,6 +13,7 @@ from aws_cdk import (
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
     aws_apigateway as apigateway,
+    aws_apigatewayv2_alpha as apigwv2,
     aws_iam as iam,
     aws_logs as logs,
     aws_elasticache as elasticache,
@@ -838,24 +839,19 @@ class RiseStack(Stack):
         sharing.add_resource("local-economy-metrics")
         
         # Create WebSocket API
-        self.websocket_api = apigateway.CfnApi(
+        self.websocket_api = apigwv2.WebSocketApi(
             self, "RiseWebSocketApi",
-            name="RISE-WebSocket-API",
-            protocol_type="WEBSOCKET",
+            api_name="RISE-WebSocket-API",
             route_selection_expression="$request.body.action",
             description="RISE Real-time WebSocket API"
         )
         
         # WebSocket stage
-        self.websocket_stage = apigateway.CfnStage(
+        self.websocket_stage = apigwv2.WebSocketStage(
             self, "RiseWebSocketStage",
-            api_id=self.websocket_api.ref,
+            web_socket_api=self.websocket_api,
             stage_name="production",
-            auto_deploy=True,
-            default_route_settings=apigateway.CfnStage.RouteSettingsProperty(
-                throttling_burst_limit=5000,
-                throttling_rate_limit=2000
-            )
+            auto_deploy=True
         )
 
     def _create_bedrock_roles(self):

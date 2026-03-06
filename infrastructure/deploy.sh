@@ -3,6 +3,9 @@
 
 set -e
 
+export AWS_PROFILE=AdministratorAccess-696874273327
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+
 echo "🚀 RISE Infrastructure Deployment"
 echo "=================================="
 

@@ -1,0 +1,21 @@
+{
+  "version": "50.0.0",
+  "files": {
+    "dc1c90d67becfa4083369702913709c746456b7450ca6829bb189dc72c0a76aa": {
+      "displayName": "RiseStack Template",
+      "source": {
+        "path": "RiseStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-us-east-1-2cf30e17": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
+          "objectKey": "dc1c90d67becfa4083369702913709c746456b7450ca6829bb189dc72c0a76aa.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

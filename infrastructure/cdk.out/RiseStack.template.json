@@ -1,0 +1,4515 @@
+{
+ "Description": "RISE - Rural Innovation and Sustainable Ecosystem Infrastructure",
+ "Resources": {
+  "UserProfilesTableF49D814C": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "user_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "phone_number",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "location_state",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "location_district",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "PhoneIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "phone_number",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "LocationIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "location_state",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "location_district",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "user_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-UserProfiles"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/UserProfilesTable/Resource"
+   }
+  },
+  "FarmDataTable7C8AF09F": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "farm_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "timestamp",
+      "AttributeType": "N"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "farm_id",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "timestamp",
+      "KeyType": "RANGE"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-FarmData"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/FarmDataTable/Resource"
+   }
+  },
+  "DiagnosisHistoryTable955DE619": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "diagnosis_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "user_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "created_timestamp",
+      "AttributeType": "N"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "UserDiagnosisIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "user_id",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "created_timestamp",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "diagnosis_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-DiagnosisHistory"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/DiagnosisHistoryTable/Resource"
+   }
+  },
+  "ResourceSharingTableA61D3E79": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "resource_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "availability_date",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "location_state",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "resource_type",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "owner_user_id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "LocationResourceIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "location_state",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "resource_type",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "OwnerResourceIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "owner_user_id",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "resource_id",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "availability_date",
+      "KeyType": "RANGE"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-ResourceSharing"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/ResourceSharingTable/Resource"
+   }
+  },
+  "BuyingGroupsTableC7A2BCD0": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "group_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "location_area",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "group_status",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "LocationGroupIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "location_area",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "StatusGroupIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "group_status",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "group_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-BuyingGroups"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/BuyingGroupsTable/Resource"
+   }
+  },
+  "ResourceBookingsTableCB830633": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "booking_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "renter_user_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "owner_user_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "resource_id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "RenterBookingIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "renter_user_id",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "OwnerBookingIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "owner_user_id",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "ResourceBookingIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "resource_id",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "booking_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-ResourceBookings"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/ResourceBookingsTable/Resource"
+   }
+  },
+  "ConversationHistoryTable59A3534C": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "session_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "timestamp",
+      "AttributeType": "N"
+     },
+     {
+      "AttributeName": "user_id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "UserConversationIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "user_id",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "timestamp",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "session_id",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "timestamp",
+      "KeyType": "RANGE"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-ConversationHistory",
+    "TimeToLiveSpecification": {
+     "AttributeName": "ttl",
+     "Enabled": true
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/ConversationHistoryTable/Resource"
+   }
+  },
+  "PestDiagnosisHistoryTableB27C05AB": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "diagnosis_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "user_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "created_timestamp",
+      "AttributeType": "N"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "UserPestDiagnosisIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "user_id",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "created_timestamp",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "diagnosis_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-PestDiagnosisHistory"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/PestDiagnosisHistoryTable/Resource"
+   }
+  },
+  "PestKnowledgeBaseTable2B811BB3": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "pest_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "pest_name",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "PestNameIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "pest_name",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "pest_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-PestKnowledgeBase"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/PestKnowledgeBaseTable/Resource"
+   }
+  },
+  "WeatherForecastTableAB2E017D": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "cache_key",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "cache_key",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-WeatherForecast",
+    "TimeToLiveSpecification": {
+     "AttributeName": "ttl",
+     "Enabled": true
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/WeatherForecastTable/Resource"
+   }
+  },
+  "MarketPricesTableB0175D8F": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "crop_market_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "timestamp",
+      "AttributeType": "N"
+     },
+     {
+      "AttributeName": "cache_key",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "CacheKeyIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "cache_key",
+        "KeyType": "HASH"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "crop_market_id",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "timestamp",
+      "KeyType": "RANGE"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-MarketPrices",
+    "TimeToLiveSpecification": {
+     "AttributeName": "ttl",
+     "Enabled": true
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/MarketPricesTable/Resource"
+   }
+  },
+  "GovernmentSchemesTable59D45A93": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "scheme_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "state",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "scheme_type",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "category",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "benefit_amount",
+      "AttributeType": "N"
+     },
+     {
+      "AttributeName": "active_status",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "application_deadline",
+      "AttributeType": "N"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "StateSchemeIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "state",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "scheme_type",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "CategorySchemeIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "category",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "benefit_amount",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     },
+     {
+      "IndexName": "DeadlineSchemeIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "active_status",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "application_deadline",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "scheme_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-GovernmentSchemes"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/GovernmentSchemesTable/Resource"
+   }
+  },
+  "AppDataBucket857FA106": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": {
+     "Fn::Join": [
+      "",
+      [
+       "rise-application-data-",
+       {
+        "Ref": "AWS::AccountId"
+       }
+      ]
+     ]
+    },
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "GET",
+        "PUT",
+        "POST"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ],
+       "MaxAge": 3000
+      }
+     ]
+    },
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "ExpirationInDays": 30,
+       "Id": "DeleteVoiceQueries",
+       "Prefix": "audio/voice-queries/",
+       "Status": "Enabled"
+      },
+      {
+       "Id": "ArchiveCropImages",
+       "Prefix": "images/crop-photos/",
+       "Status": "Enabled",
+       "Transitions": [
+        {
+         "StorageClass": "STANDARD_IA",
+         "TransitionInDays": 90
+        },
+        {
+         "StorageClass": "GLACIER",
+         "TransitionInDays": 365
+        }
+       ]
+      },
+      {
+       "Id": "ArchivePestImages",
+       "Prefix": "images/pest-photos/",
+       "Status": "Enabled",
+       "Transitions": [
+        {
+         "StorageClass": "STANDARD_IA",
+         "TransitionInDays": 90
+        },
+        {
+         "StorageClass": "GLACIER",
+         "TransitionInDays": 365
+        }
+       ]
+      },
+      {
+       "Id": "ArchiveThumbnails",
+       "Prefix": "images/thumbnails/",
+       "Status": "Enabled",
+       "Transitions": [
+        {
+         "StorageClass": "STANDARD_IA",
+         "TransitionInDays": 90
+        }
+       ]
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/AppDataBucket/Resource"
+   }
+  },
+  "AppDataBucketPolicyE31553DB": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "AppDataBucket857FA106"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "RiseOAIE1B76470",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "AppDataBucket857FA106",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "AppDataBucket857FA106",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "RiseOAIE1B76470",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "AppDataBucket857FA106",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/AppDataBucket/Policy/Resource"
+   }
+  },
+  "RiseOAIE1B76470": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": "OAI for RISE application data"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseOAI/Resource"
+   }
+  },
+  "StaticContentCachePolicy991419A6": {
+   "Type": "AWS::CloudFront::CachePolicy",
+   "Properties": {
+    "CachePolicyConfig": {
+     "DefaultTTL": 31536000,
+     "MaxTTL": 31536000,
+     "MinTTL": 86400,
+     "Name": "RiseStackStaticContentCachePolicyCAA37C08-us-east-1",
+     "ParametersInCacheKeyAndForwardedToOrigin": {
+      "CookiesConfig": {
+       "CookieBehavior": "none"
+      },
+      "EnableAcceptEncodingBrotli": true,
+      "EnableAcceptEncodingGzip": true,
+      "HeadersConfig": {
+       "HeaderBehavior": "none"
+      },
+      "QueryStringsConfig": {
+       "QueryStringBehavior": "none"
+      }
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/StaticContentCachePolicy/Resource"
+   }
+  },
+  "ImagesCachePolicy8E44AD34": {
+   "Type": "AWS::CloudFront::CachePolicy",
+   "Properties": {
+    "CachePolicyConfig": {
+     "DefaultTTL": 604800,
+     "MaxTTL": 2592000,
+     "MinTTL": 3600,
+     "Name": "RiseStackImagesCachePolicy7FB41D93-us-east-1",
+     "ParametersInCacheKeyAndForwardedToOrigin": {
+      "CookiesConfig": {
+       "CookieBehavior": "none"
+      },
+      "EnableAcceptEncodingBrotli": true,
+      "EnableAcceptEncodingGzip": true,
+      "HeadersConfig": {
+       "HeaderBehavior": "none"
+      },
+      "QueryStringsConfig": {
+       "QueryStringBehavior": "none"
+      }
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/ImagesCachePolicy/Resource"
+   }
+  },
+  "RiseDistributionLoggingBucket8039A7DD": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "OwnershipControls": {
+     "Rules": [
+      {
+       "ObjectOwnership": "ObjectWriter"
+      }
+     ]
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseDistribution/LoggingBucket/Resource"
+   }
+  },
+  "RiseDistribution2EC067CB": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "CacheBehaviors": [
+      {
+       "CachePolicyId": {
+        "Ref": "StaticContentCachePolicy991419A6"
+       },
+       "Compress": true,
+       "PathPattern": "static-content/*",
+       "TargetOriginId": "RiseStackRiseDistributionOrigin21F3B7CA1",
+       "ViewerProtocolPolicy": "redirect-to-https"
+      },
+      {
+       "CachePolicyId": {
+        "Ref": "ImagesCachePolicy8E44AD34"
+       },
+       "Compress": true,
+       "PathPattern": "images/*",
+       "TargetOriginId": "RiseStackRiseDistributionOrigin3185BD099",
+       "ViewerProtocolPolicy": "redirect-to-https"
+      }
+     ],
+     "Comment": "RISE CDN Distribution",
+     "DefaultCacheBehavior": {
+      "AllowedMethods": [
+       "GET",
+       "HEAD",
+       "OPTIONS"
+      ],
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "Compress": true,
+      "TargetOriginId": "RiseStackRiseDistributionOrigin175251386",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Logging": {
+      "Bucket": {
+       "Fn::GetAtt": [
+        "RiseDistributionLoggingBucket8039A7DD",
+        "RegionalDomainName"
+       ]
+      }
+     },
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "AppDataBucket857FA106",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "RiseStackRiseDistributionOrigin175251386",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "RiseOAIE1B76470"
+           }
+          ]
+         ]
+        }
+       }
+      },
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "AppDataBucket857FA106",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "RiseStackRiseDistributionOrigin21F3B7CA1",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "RiseOAIE1B76470"
+           }
+          ]
+         ]
+        }
+       }
+      },
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "AppDataBucket857FA106",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "RiseStackRiseDistributionOrigin3185BD099",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "RiseOAIE1B76470"
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ],
+     "PriceClass": "PriceClass_200"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseDistribution/Resource"
+   }
+  },
+  "RiseRestApi653CC8E0": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "RISE Farming Assistant REST API",
+    "Name": "RISE-API"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Resource"
+   }
+  },
+  "RiseRestApiCloudWatchRole1DF142A5": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "apigateway.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+       ]
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/CloudWatchRole/Resource"
+   }
+  },
+  "RiseRestApiAccount80E65D38": {
+   "Type": "AWS::ApiGateway::Account",
+   "Properties": {
+    "CloudWatchRoleArn": {
+     "Fn::GetAtt": [
+      "RiseRestApiCloudWatchRole1DF142A5",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "RiseRestApi653CC8E0"
+   ],
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Account"
+   }
+  },
+  "RiseRestApiDeploymentBD243178c88d6bfe3ea472da0177413cac3064ea": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "RISE Farming Assistant REST API",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "DependsOn": [
+    "RiseRestApiapiOPTIONS613DF6F5",
+    "RiseRestApiapi23112541",
+    "RiseRestApiapiv1authloginOPTIONS5393EC89",
+    "RiseRestApiapiv1authloginDBFB0594",
+    "RiseRestApiapiv1authOPTIONS3A3251EE",
+    "RiseRestApiapiv1authrefreshtokenOPTIONSE3B0B0B4",
+    "RiseRestApiapiv1authrefreshtoken1F590984",
+    "RiseRestApiapiv1authregisterOPTIONS92E56A46",
+    "RiseRestApiapiv1authregisterFB1F2AB3",
+    "RiseRestApiapiv1auth378CEA74",
+    "RiseRestApiapiv1communityavailableequipmentlocationOPTIONSA233A450",
+    "RiseRestApiapiv1communityavailableequipmentlocation9631EDC6",
+    "RiseRestApiapiv1communityavailableequipmentOPTIONSB3919305",
+    "RiseRestApiapiv1communityavailableequipment87CA4392",
+    "RiseRestApiapiv1communitybookequipmentOPTIONSABB728AF",
+    "RiseRestApiapiv1communitybookequipment4F4A39D8",
+    "RiseRestApiapiv1communitybuyinggroupsOPTIONS0B5A9CF9",
+    "RiseRestApiapiv1communitybuyinggroups1CAC057E",
+    "RiseRestApiapiv1communitycreatebuyinggroupOPTIONSD6279EEF",
+    "RiseRestApiapiv1communitycreatebuyinggroup71105F0F",
+    "RiseRestApiapiv1communitydiscussionsOPTIONS71DAD0EF",
+    "RiseRestApiapiv1communitydiscussionsF5CA6C07",
+    "RiseRestApiapiv1communityforumsOPTIONS3958DDA6",
+    "RiseRestApiapiv1communityforums5D6C8278",
+    "RiseRestApiapiv1communityjoinbuyinggroupOPTIONSDFB9A0B0",
+    "RiseRestApiapiv1communityjoinbuyinggroupC23EC098",
+    "RiseRestApiapiv1communitylistequipmentOPTIONS722BD277",
+    "RiseRestApiapiv1communitylistequipment59785CEA",
+    "RiseRestApiapiv1communityOPTIONS3D6518E6",
+    "RiseRestApiapiv1community43228E5E",
+    "RiseRestApiapiv1communityresourcealertsuseridOPTIONS43B184EE",
+    "RiseRestApiapiv1communityresourcealertsuserid763859D5",
+    "RiseRestApiapiv1communityresourcealertsOPTIONSCED4C9BB",
+    "RiseRestApiapiv1communityresourcealerts49BA413F",
+    "RiseRestApiapiv1communityresourcesharingOPTIONSFD05ED3D",
+    "RiseRestApiapiv1communityresourcesharing2F2AADAC",
+    "RiseRestApiapiv1communitytranslatemessageOPTIONS0B820458",
+    "RiseRestApiapiv1communitytranslatemessageBC612FEF",
+    "RiseRestApiapiv1diagnosiscropdiseaseOPTIONS4CEB6D3C",
+    "RiseRestApiapiv1diagnosiscropdisease2510DA24",
+    "RiseRestApiapiv1diagnosisOPTIONS8274EF2B",
+    "RiseRestApiapiv1diagnosispestidentificationOPTIONSA6CA5914",
+    "RiseRestApiapiv1diagnosispestidentification950D0945",
+    "RiseRestApiapiv1diagnosisCE374F14",
+    "RiseRestApiapiv1diagnosissoilanalysisOPTIONSC3F58E06",
+    "RiseRestApiapiv1diagnosissoilanalysis3DAC45A8",
+    "RiseRestApiapiv1financialcalculateprofitabilityOPTIONSF01B5257",
+    "RiseRestApiapiv1financialcalculateprofitability8936B699",
+    "RiseRestApiapiv1financialloanproductsOPTIONSD51CC7DB",
+    "RiseRestApiapiv1financialloanproductsEA6F79F5",
+    "RiseRestApiapiv1financialOPTIONS36668C2F",
+    "RiseRestApiapiv1financial061F8F29",
+    "RiseRestApiapiv1financialschemeeligibilityOPTIONS96E567CE",
+    "RiseRestApiapiv1financialschemeeligibilityEFD05C2C",
+    "RiseRestApiapiv1intelligencemarketpricescroplocationOPTIONSE8461287",
+    "RiseRestApiapiv1intelligencemarketpricescroplocation29CAF3B6",
+    "RiseRestApiapiv1intelligencemarketpricescropOPTIONSE19F1113",
+    "RiseRestApiapiv1intelligencemarketpricescropE112B489",
+    "RiseRestApiapiv1intelligencemarketpricesOPTIONSBD4AEBAB",
+    "RiseRestApiapiv1intelligencemarketprices4343E79D",
+    "RiseRestApiapiv1intelligenceOPTIONS3902C5EC",
+    "RiseRestApiapiv1intelligence68DDFA40",
+    "RiseRestApiapiv1intelligenceschemesuseridOPTIONSB4F16CD5",
+    "RiseRestApiapiv1intelligenceschemesuserid9CF8D0B3",
+    "RiseRestApiapiv1intelligenceschemesOPTIONS1AFB70AF",
+    "RiseRestApiapiv1intelligenceschemesF2898D07",
+    "RiseRestApiapiv1intelligenceweatherlocationOPTIONSCE097EC5",
+    "RiseRestApiapiv1intelligenceweatherlocation7FD4A6F0",
+    "RiseRestApiapiv1intelligenceweatherOPTIONSD9476477",
+    "RiseRestApiapiv1intelligenceweather79E83062",
+    "RiseRestApiapiv1OPTIONSA4AC8FD8",
+    "RiseRestApiapiv1949CFAF1",
+    "RiseRestApiapiv1sharingbulkordercreationOPTIONS656B54A6",
+    "RiseRestApiapiv1sharingbulkordercreationB7BB3554",
+    "RiseRestApiapiv1sharingcooperativeopportunitiesOPTIONSF1CC0541",
+    "RiseRestApiapiv1sharingcooperativeopportunities1A64AAB8",
+    "RiseRestApiapiv1sharingequipmentavailabilityOPTIONS8F720277",
+    "RiseRestApiapiv1sharingequipmentavailability5498FEAB",
+    "RiseRestApiapiv1sharingequipmentbookingOPTIONS7B5931AE",
+    "RiseRestApiapiv1sharingequipmentbooking98B59C8C",
+    "RiseRestApiapiv1sharinglocaleconomymetricsOPTIONSD9143960",
+    "RiseRestApiapiv1sharinglocaleconomymetricsED780A33",
+    "RiseRestApiapiv1sharingOPTIONSA065052A",
+    "RiseRestApiapiv1sharingEC959086",
+    "RiseRestApiapiv1voiceOPTIONS44D48079",
+    "RiseRestApiapiv1voice2A3A14FC",
+    "RiseRestApiapiv1voicesynthesizeOPTIONS83E9962E",
+    "RiseRestApiapiv1voicesynthesize1F390D7A",
+    "RiseRestApiapiv1voicetranscribeOPTIONS663E02D8",
+    "RiseRestApiapiv1voicetranscribe4817A38C",
+    "RiseRestApiapiv1voicetranslateOPTIONS43DE84CB",
+    "RiseRestApiapiv1voicetranslate4CF06BD8",
+    "RiseRestApiOPTIONSBAE61F61"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Deployment/Resource",
+    "aws:cdk:do-not-refactor": true
+   }
+  },
+  "RiseRestApiDeploymentStagev161411663": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "CacheClusterEnabled": true,
+    "CacheClusterSize": "0.5",
+    "DeploymentId": {
+     "Ref": "RiseRestApiDeploymentBD243178c88d6bfe3ea472da0177413cac3064ea"
+    },
+    "MethodSettings": [
+     {
+      "CacheTtlInSeconds": 3600,
+      "CachingEnabled": true,
+      "DataTraceEnabled": true,
+      "HttpMethod": "*",
+      "LoggingLevel": "INFO",
+      "MetricsEnabled": true,
+      "ResourcePath": "/*",
+      "ThrottlingBurstLimit": 2000,
+      "ThrottlingRateLimit": 1000
+     }
+    ],
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    },
+    "StageName": "v1"
+   },
+   "DependsOn": [
+    "RiseRestApiAccount80E65D38"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/DeploymentStage.v1/Resource"
+   }
+  },
+  "RiseRestApiOPTIONSBAE61F61": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "RiseRestApi653CC8E0",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapi23112541": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "RiseRestApi653CC8E0",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "api",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/Resource"
+   }
+  },
+  "RiseRestApiapiOPTIONS613DF6F5": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapi23112541"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1949CFAF1": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapi23112541"
+    },
+    "PathPart": "v1",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/Resource"
+   }
+  },
+  "RiseRestApiapiv1OPTIONSA4AC8FD8": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1949CFAF1"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1auth378CEA74": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1949CFAF1"
+    },
+    "PathPart": "auth",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/auth/Resource"
+   }
+  },
+  "RiseRestApiapiv1authOPTIONS3A3251EE": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1auth378CEA74"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/auth/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1authloginDBFB0594": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1auth378CEA74"
+    },
+    "PathPart": "login",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/auth/login/Resource"
+   }
+  },
+  "RiseRestApiapiv1authloginOPTIONS5393EC89": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1authloginDBFB0594"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/auth/login/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1authregisterFB1F2AB3": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1auth378CEA74"
+    },
+    "PathPart": "register",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/auth/register/Resource"
+   }
+  },
+  "RiseRestApiapiv1authregisterOPTIONS92E56A46": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1authregisterFB1F2AB3"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/auth/register/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1authrefreshtoken1F590984": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1auth378CEA74"
+    },
+    "PathPart": "refresh-token",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/auth/refresh-token/Resource"
+   }
+  },
+  "RiseRestApiapiv1authrefreshtokenOPTIONSE3B0B0B4": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1authrefreshtoken1F590984"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/auth/refresh-token/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1voice2A3A14FC": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1949CFAF1"
+    },
+    "PathPart": "voice",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/voice/Resource"
+   }
+  },
+  "RiseRestApiapiv1voiceOPTIONS44D48079": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1voice2A3A14FC"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/voice/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1voicetranscribe4817A38C": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1voice2A3A14FC"
+    },
+    "PathPart": "transcribe",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/voice/transcribe/Resource"
+   }
+  },
+  "RiseRestApiapiv1voicetranscribeOPTIONS663E02D8": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1voicetranscribe4817A38C"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/voice/transcribe/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1voicesynthesize1F390D7A": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1voice2A3A14FC"
+    },
+    "PathPart": "synthesize",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/voice/synthesize/Resource"
+   }
+  },
+  "RiseRestApiapiv1voicesynthesizeOPTIONS83E9962E": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1voicesynthesize1F390D7A"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/voice/synthesize/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1voicetranslate4CF06BD8": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1voice2A3A14FC"
+    },
+    "PathPart": "translate",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/voice/translate/Resource"
+   }
+  },
+  "RiseRestApiapiv1voicetranslateOPTIONS43DE84CB": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1voicetranslate4CF06BD8"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/voice/translate/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1diagnosisCE374F14": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1949CFAF1"
+    },
+    "PathPart": "diagnosis",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/diagnosis/Resource"
+   }
+  },
+  "RiseRestApiapiv1diagnosisOPTIONS8274EF2B": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1diagnosisCE374F14"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/diagnosis/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1diagnosiscropdisease2510DA24": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1diagnosisCE374F14"
+    },
+    "PathPart": "crop-disease",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/diagnosis/crop-disease/Resource"
+   }
+  },
+  "RiseRestApiapiv1diagnosiscropdiseaseOPTIONS4CEB6D3C": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1diagnosiscropdisease2510DA24"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/diagnosis/crop-disease/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1diagnosispestidentification950D0945": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1diagnosisCE374F14"
+    },
+    "PathPart": "pest-identification",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/diagnosis/pest-identification/Resource"
+   }
+  },
+  "RiseRestApiapiv1diagnosispestidentificationOPTIONSA6CA5914": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1diagnosispestidentification950D0945"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/diagnosis/pest-identification/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1diagnosissoilanalysis3DAC45A8": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1diagnosisCE374F14"
+    },
+    "PathPart": "soil-analysis",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/diagnosis/soil-analysis/Resource"
+   }
+  },
+  "RiseRestApiapiv1diagnosissoilanalysisOPTIONSC3F58E06": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1diagnosissoilanalysis3DAC45A8"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/diagnosis/soil-analysis/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligence68DDFA40": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1949CFAF1"
+    },
+    "PathPart": "intelligence",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligenceOPTIONS3902C5EC": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1intelligence68DDFA40"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligenceweather79E83062": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1intelligence68DDFA40"
+    },
+    "PathPart": "weather",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/weather/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligenceweatherOPTIONSD9476477": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1intelligenceweather79E83062"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/weather/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligenceweatherlocation7FD4A6F0": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1intelligenceweather79E83062"
+    },
+    "PathPart": "{location}",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/weather/{location}/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligenceweatherlocationOPTIONSCE097EC5": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1intelligenceweatherlocation7FD4A6F0"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/weather/{location}/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligencemarketprices4343E79D": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1intelligence68DDFA40"
+    },
+    "PathPart": "market-prices",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/market-prices/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligencemarketpricesOPTIONSBD4AEBAB": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1intelligencemarketprices4343E79D"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/market-prices/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligencemarketpricescropE112B489": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1intelligencemarketprices4343E79D"
+    },
+    "PathPart": "{crop}",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/market-prices/{crop}/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligencemarketpricescropOPTIONSE19F1113": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1intelligencemarketpricescropE112B489"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/market-prices/{crop}/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligencemarketpricescroplocation29CAF3B6": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1intelligencemarketpricescropE112B489"
+    },
+    "PathPart": "{location}",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/market-prices/{crop}/{location}/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligencemarketpricescroplocationOPTIONSE8461287": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1intelligencemarketpricescroplocation29CAF3B6"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/market-prices/{crop}/{location}/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligenceschemesF2898D07": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1intelligence68DDFA40"
+    },
+    "PathPart": "schemes",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/schemes/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligenceschemesOPTIONS1AFB70AF": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1intelligenceschemesF2898D07"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/schemes/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligenceschemesuserid9CF8D0B3": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1intelligenceschemesF2898D07"
+    },
+    "PathPart": "{user_id}",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/schemes/{user_id}/Resource"
+   }
+  },
+  "RiseRestApiapiv1intelligenceschemesuseridOPTIONSB4F16CD5": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1intelligenceschemesuserid9CF8D0B3"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/intelligence/schemes/{user_id}/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1community43228E5E": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1949CFAF1"
+    },
+    "PathPart": "community",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityOPTIONS3D6518E6": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityforums5D6C8278": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "forums",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/forums/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityforumsOPTIONS3958DDA6": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communityforums5D6C8278"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/forums/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitydiscussionsF5CA6C07": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "discussions",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/discussions/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitydiscussionsOPTIONS71DAD0EF": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communitydiscussionsF5CA6C07"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/discussions/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitytranslatemessageBC612FEF": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "translate-message",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/translate-message/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitytranslatemessageOPTIONS0B820458": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communitytranslatemessageBC612FEF"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/translate-message/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityresourcesharing2F2AADAC": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "resource-sharing",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/resource-sharing/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityresourcesharingOPTIONSFD05ED3D": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communityresourcesharing2F2AADAC"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/resource-sharing/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitylistequipment59785CEA": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "list-equipment",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/list-equipment/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitylistequipmentOPTIONS722BD277": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communitylistequipment59785CEA"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/list-equipment/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityavailableequipment87CA4392": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "available-equipment",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/available-equipment/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityavailableequipmentOPTIONSB3919305": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communityavailableequipment87CA4392"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/available-equipment/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityavailableequipmentlocation9631EDC6": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1communityavailableequipment87CA4392"
+    },
+    "PathPart": "{location}",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/available-equipment/{location}/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityavailableequipmentlocationOPTIONSA233A450": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communityavailableequipmentlocation9631EDC6"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/available-equipment/{location}/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitybookequipment4F4A39D8": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "book-equipment",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/book-equipment/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitybookequipmentOPTIONSABB728AF": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communitybookequipment4F4A39D8"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/book-equipment/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitybuyinggroups1CAC057E": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "buying-groups",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/buying-groups/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitybuyinggroupsOPTIONS0B5A9CF9": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communitybuyinggroups1CAC057E"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/buying-groups/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitycreatebuyinggroup71105F0F": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "create-buying-group",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/create-buying-group/Resource"
+   }
+  },
+  "RiseRestApiapiv1communitycreatebuyinggroupOPTIONSD6279EEF": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communitycreatebuyinggroup71105F0F"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/create-buying-group/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityjoinbuyinggroupC23EC098": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "join-buying-group",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/join-buying-group/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityjoinbuyinggroupOPTIONSDFB9A0B0": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communityjoinbuyinggroupC23EC098"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/join-buying-group/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityresourcealerts49BA413F": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1community43228E5E"
+    },
+    "PathPart": "resource-alerts",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/resource-alerts/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityresourcealertsOPTIONSCED4C9BB": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communityresourcealerts49BA413F"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/resource-alerts/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityresourcealertsuserid763859D5": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1communityresourcealerts49BA413F"
+    },
+    "PathPart": "{user_id}",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/resource-alerts/{user_id}/Resource"
+   }
+  },
+  "RiseRestApiapiv1communityresourcealertsuseridOPTIONS43B184EE": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1communityresourcealertsuserid763859D5"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/community/resource-alerts/{user_id}/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1financial061F8F29": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1949CFAF1"
+    },
+    "PathPart": "financial",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/financial/Resource"
+   }
+  },
+  "RiseRestApiapiv1financialOPTIONS36668C2F": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1financial061F8F29"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/financial/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1financialcalculateprofitability8936B699": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1financial061F8F29"
+    },
+    "PathPart": "calculate-profitability",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/financial/calculate-profitability/Resource"
+   }
+  },
+  "RiseRestApiapiv1financialcalculateprofitabilityOPTIONSF01B5257": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1financialcalculateprofitability8936B699"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/financial/calculate-profitability/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1financialloanproductsEA6F79F5": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1financial061F8F29"
+    },
+    "PathPart": "loan-products",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/financial/loan-products/Resource"
+   }
+  },
+  "RiseRestApiapiv1financialloanproductsOPTIONSD51CC7DB": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1financialloanproductsEA6F79F5"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/financial/loan-products/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1financialschemeeligibilityEFD05C2C": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1financial061F8F29"
+    },
+    "PathPart": "scheme-eligibility",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/financial/scheme-eligibility/Resource"
+   }
+  },
+  "RiseRestApiapiv1financialschemeeligibilityOPTIONS96E567CE": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1financialschemeeligibilityEFD05C2C"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/financial/scheme-eligibility/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingEC959086": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1949CFAF1"
+    },
+    "PathPart": "sharing",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingOPTIONSA065052A": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1sharingEC959086"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingequipmentavailability5498FEAB": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1sharingEC959086"
+    },
+    "PathPart": "equipment-availability",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/equipment-availability/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingequipmentavailabilityOPTIONS8F720277": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1sharingequipmentavailability5498FEAB"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/equipment-availability/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingequipmentbooking98B59C8C": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1sharingEC959086"
+    },
+    "PathPart": "equipment-booking",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/equipment-booking/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingequipmentbookingOPTIONS7B5931AE": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1sharingequipmentbooking98B59C8C"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/equipment-booking/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingcooperativeopportunities1A64AAB8": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1sharingEC959086"
+    },
+    "PathPart": "cooperative-opportunities",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/cooperative-opportunities/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingcooperativeopportunitiesOPTIONSF1CC0541": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1sharingcooperativeopportunities1A64AAB8"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/cooperative-opportunities/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingbulkordercreationB7BB3554": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1sharingEC959086"
+    },
+    "PathPart": "bulk-order-creation",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/bulk-order-creation/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharingbulkordercreationOPTIONS656B54A6": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1sharingbulkordercreationB7BB3554"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/bulk-order-creation/OPTIONS/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharinglocaleconomymetricsED780A33": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "RiseRestApiapiv1sharingEC959086"
+    },
+    "PathPart": "local-economy-metrics",
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/local-economy-metrics/Resource"
+   }
+  },
+  "RiseRestApiapiv1sharinglocaleconomymetricsOPTIONSD9143960": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "RiseRestApiapiv1sharinglocaleconomymetricsED780A33"
+    },
+    "RestApiId": {
+     "Ref": "RiseRestApi653CC8E0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseRestApi/Default/api/v1/sharing/local-economy-metrics/OPTIONS/Resource"
+   }
+  },
+  "RiseWebSocketApi7A94115A": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "Description": "RISE Real-time WebSocket API",
+    "Name": "RISE-WebSocket-API",
+    "ProtocolType": "WEBSOCKET",
+    "RouteSelectionExpression": "$request.body.action"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseWebSocketApi/Resource"
+   }
+  },
+  "RiseWebSocketStage1F77DB98": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "RiseWebSocketApi7A94115A"
+    },
+    "AutoDeploy": true,
+    "StageName": "production"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseWebSocketStage/Resource"
+   }
+  },
+  "BedrockExecutionRole9C52C73A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "Role for Lambda functions to access Amazon Bedrock",
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/BedrockExecutionRole/Resource"
+   }
+  },
+  "BedrockExecutionRoleDefaultPolicy1A669643": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "bedrock:GetFoundationModel",
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream",
+        "bedrock:ListFoundationModels",
+        "comprehend:DetectDominantLanguage",
+        "comprehend:DetectSentiment",
+        "polly:SynthesizeSpeech",
+        "transcribe:GetTranscriptionJob",
+        "transcribe:StartTranscriptionJob",
+        "translate:TranslateText"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "BuyingGroupsTableC7A2BCD0",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "ConversationHistoryTable59A3534C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "DiagnosisHistoryTable955DE619",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "FarmDataTable7C8AF09F",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "GovernmentSchemesTable59D45A93",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "MarketPricesTableB0175D8F",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PestDiagnosisHistoryTableB27C05AB",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PestKnowledgeBaseTable2B811BB3",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "ResourceBookingsTableCB830633",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "ResourceSharingTableA61D3E79",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "UserProfilesTableF49D814C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "WeatherForecastTableAB2E017D",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "BuyingGroupsTableC7A2BCD0",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ConversationHistoryTable59A3534C",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "DiagnosisHistoryTable955DE619",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "GovernmentSchemesTable59D45A93",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "MarketPricesTableB0175D8F",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PestDiagnosisHistoryTableB27C05AB",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PestKnowledgeBaseTable2B811BB3",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ResourceBookingsTableCB830633",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ResourceSharingTableA61D3E79",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "UserProfilesTableF49D814C",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "AppDataBucket857FA106",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "AppDataBucket857FA106",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BedrockExecutionRoleDefaultPolicy1A669643",
+    "Roles": [
+     {
+      "Ref": "BedrockExecutionRole9C52C73A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/BedrockExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21Ry26DMBD8ltyNE0g+oHkoUg9VIlKpx8qYTdgGbITXjZDlf69sSKFSTzuzO559OOMu26z4aiEeJpHlPamx4O5CQt6ZeJhPV/ZKNLosuHsXRQ1sf1UReGbW3O2svAOF5IiGcNY1yn5KD9wzWWtbXjutiLtThzdUWynBmNcSFCHFF/ugOQbN/wohK5j85/SAhjosLKFWoTbnnokWb4LgIXrucjC0bTGIZnArpbaK2AHaWvcNqLjYjF1I3OIFBpCD0baTsBMG2BtQpctQHNGzOjaJ2DMUDXe5Hg4Z47TL80rTpN8Zd2GwYb7Y1fs/zidLrSXP0nTD00TUbSX4avEy/uYyxLndqHAfUFx0+Jlg/UueDc49VVot1zxd82zxZRCTzirCBng+xB9Zq3+CNwIAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "RiseRestApiEndpointDE36018A": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "RiseRestApi653CC8E0"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "RiseRestApiDeploymentStagev161411663"
+      },
+      "/"
+     ]
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
