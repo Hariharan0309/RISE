@@ -1,0 +1,82 @@
+# Testing dependencies for RISE Lambda functions
+
+# Core testing framework
+unittest2==1.1.0
+
+# AWS mocking and testing
+moto[all]==4.2.14
+boto3==1.34.0
+botocore==1.34.0
+
+# JWT handling for authentication tests
+PyJWT==2.8.0
+
+# Image processing for image validation tests
+Pillow==10.1.0
+
+# HTTP requests mocking
+responses==0.24.1
+requests-mock==1.11.0
+
+# Test coverage analysis
+coverage==7.3.2
+
+# Test data generation
+faker==20.1.0
+
+# Async testing support
+pytest-asyncio==0.21.1
+
+# Memory profiling for performance tests
+memory-profiler==0.61.0
+
+# Time/date mocking
+freezegun==1.2.2
+
+# Environment variable management
+python-dotenv==1.0.0
+
+# JSON schema validation for API testing
+jsonschema==4.20.0
+
+# Parameterized testing
+parameterized==0.9.0
+
+# Test fixtures and utilities
+pytest-fixtures==0.1.0
+
+# Mock HTTP servers for external API testing
+httpretty==1.1.4
+
+# Database testing utilities
+sqlalchemy==2.0.23  # For any SQL-based testing
+
+# Logging testing
+testfixtures==7.2.2
+
+# Property-based testing (for future use)
+hypothesis==6.92.1
+
+# Performance testing
+locust==2.17.0
+
+# API testing
+tavern==2.4.1
+
+# Test reporting
+pytest-html==4.1.1
+pytest-json-report==1.5.0
+
+# Parallel test execution
+pytest-xdist==3.5.0
+
+# Test ordering and dependencies
+pytest-dependency==0.5.1
+
+# Snapshot testing
+syrupy==4.6.0
+
+# Frontend testing dependencies
+streamlit==1.29.0  # For Streamlit component testing
+pytest==7.4.3  # Modern pytest version
+pytest-mock==3.12.0  # Enhanced mocking for pytest

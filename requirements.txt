@@ -104,3 +104,6 @@ zipp==3.23.0
 
 # Testing dependencies
 moto[dynamodb,s3]==5.1.21
+
+# Analytics dashboard dependencies
+plotly==5.24.1
