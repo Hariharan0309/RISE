@@ -1,0 +1,87 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Tests
+tests/
+test_*.py
+*_test.py
+.pytest_cache/
+.coverage
+htmlcov/
+
+# CDK
+infrastructure/cdk.out/
+infrastructure/node_modules/
+infrastructure/*.js
+infrastructure/*.d.ts
+
+# Logs
+*.log
+logs/
+
+# Environment files (will be set via App Runner)
+.env
+.env.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Completion markers
+*_COMPLETE.md
+TASK_*.md
+PHASE*.md
+
+# Deployment files
+deploy.sh
+verify_*.py
+test_*.py
