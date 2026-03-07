@@ -111,7 +111,11 @@ EOF
     aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file:///tmp/ecs-trust-policy.json --profile $AWS_PROFILE
     aws iam attach-role-policy --role-name $ROLE_NAME --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy --profile $AWS_PROFILE
 
-    cat > /tmp/bedrock-policy.json << EOF
+    sleep 5
+fi
+
+# Bedrock + Marketplace: required for ConverseStream / inference profiles (update every deploy)
+cat > /tmp/bedrock-policy.json << EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -122,13 +126,19 @@ EOF
         "bedrock:InvokeModelWithResponseStream"
       ],
       "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "aws-marketplace:ViewSubscriptions",
+        "aws-marketplace:Subscribe"
+      ],
+      "Resource": "*"
     }
   ]
 }
 EOF
-    aws iam put-role-policy --role-name $ROLE_NAME --policy-name BedrockAccessPolicy --policy-document file:///tmp/bedrock-policy.json --profile $AWS_PROFILE
-    sleep 5
-fi
+aws iam put-role-policy --role-name $ROLE_NAME --policy-name BedrockAccessPolicy --policy-document file:///tmp/bedrock-policy.json --profile $AWS_PROFILE
 
 cat > /tmp/task-def.json << EOF
 {

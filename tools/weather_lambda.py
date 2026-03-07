@@ -13,11 +13,8 @@ from weather_tools import WeatherTools
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Initialize weather tools
-weather_tools = WeatherTools(
-    region=os.environ.get('AWS_REGION', 'us-east-1'),
-    api_key=os.environ.get('OPENWEATHER_API_KEY', '')
-)
+# Initialize weather tools (Open-Meteo free API - no key required)
+weather_tools = WeatherTools(region=os.environ.get('AWS_REGION', 'us-east-1'))
 
 
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:

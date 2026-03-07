@@ -646,7 +646,12 @@ class MarketPriceTools:
             logger.warning(f"Cache save error: {e}")
 
 
-# Tool functions for agent integration
+# Tool functions for agent integration (Strands @tool for orchestrator)
+try:
+    from strands import tool
+except ImportError:
+    def tool(fn):
+        return fn  # no-op if Strands not installed
 
 def create_market_price_tools(region: str = "us-east-1") -> MarketPriceTools:
     """
@@ -661,18 +666,10 @@ def create_market_price_tools(region: str = "us-east-1") -> MarketPriceTools:
     return MarketPriceTools(region=region)
 
 
+@tool
 def get_current_prices_tool(crop_name: str, latitude: float, longitude: float, radius_km: int = 50) -> str:
     """
-    Tool for getting current market prices
-    
-    Args:
-        crop_name: Name of the crop
-        latitude: Location latitude
-        longitude: Location longitude
-        radius_km: Search radius in kilometers
-    
-    Returns:
-        Current market prices information
+    Get current market prices for a crop near a location. Use when the user asks about crop prices, mandi rates, or selling price.
     """
     tools = create_market_price_tools()
     result = tools.get_current_prices(crop_name, latitude, longitude, radius_km)
@@ -695,17 +692,10 @@ Top Markets:
         return f"Error: {result.get('error', 'Failed to fetch market prices')}"
 
 
+@tool
 def get_price_history_tool(crop_name: str, market_id: str, days: int = 30) -> str:
     """
-    Tool for getting price history
-    
-    Args:
-        crop_name: Name of the crop
-        market_id: Market identifier
-        days: Number of days of history
-    
-    Returns:
-        Price history information
+    Get price history and trends for a crop at a market. Use when the user asks about price trends, past rates, or market_id.
     """
     tools = create_market_price_tools()
     result = tools.get_price_history(crop_name, market_id, days)
@@ -726,18 +716,10 @@ Volatility: {trends['volatility']:.2f}
         return f"Error: {result.get('error', 'Failed to fetch price history')}"
 
 
+@tool
 def get_optimal_selling_time_tool(crop_name: str, latitude: float, longitude: float, storage_capacity: bool = True) -> str:
     """
-    Tool for getting optimal selling time recommendation
-    
-    Args:
-        crop_name: Name of the crop
-        latitude: Location latitude
-        longitude: Location longitude
-        storage_capacity: Whether farmer has storage
-    
-    Returns:
-        Optimal selling time recommendation
+    Get recommendation for when to sell a crop (optimal selling time). Use when the user asks when to sell, best time to sell, or storage vs sell now.
     """
     tools = create_market_price_tools()
     result = tools.get_optimal_selling_time(crop_name, latitude, longitude, None, storage_capacity)

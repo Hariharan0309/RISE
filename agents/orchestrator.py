@@ -250,6 +250,8 @@ Help farmers improve agricultural outcomes, access fair markets, and adopt susta
 - Adapt recommendations to local climate and soil conditions
 - Consider seasonal timing in all advice
 
+**Using live data:** You have tools to fetch current weather and market prices. When the user asks about weather, forecast, or crop prices, use these tools with the user's location (latitude/longitude). If they have not given coordinates, ask for their district or use a typical coordinate for their state to give useful local information.
+
 You are a trusted partner in the farmer's journey toward better yields, fair prices, and sustainable agriculture."""
         
         try:
@@ -258,17 +260,39 @@ You are a trusted partner in the farmer's journey toward better yields, fair pri
                 model_id=self.config.BEDROCK_MODEL_ID
             )
             
-            # Initialize Strands Agent with Bedrock model
+            # Build tool list: weather and market so the agent can answer with real data
+            agent_tools = []
+            try:
+                from tools.weather_tools import (
+                    get_current_weather_tool,
+                    get_forecast_tool,
+                    get_farming_insights_tool,
+                )
+                agent_tools.extend([get_current_weather_tool, get_forecast_tool, get_farming_insights_tool])
+                logger.info("Weather tools registered with agent")
+            except Exception as e:
+                logger.warning(f"Weather tools not available: {e}")
+            try:
+                from tools.market_price_tools import (
+                    get_current_prices_tool,
+                    get_price_history_tool,
+                    get_optimal_selling_time_tool,
+                )
+                agent_tools.extend([get_current_prices_tool, get_price_history_tool, get_optimal_selling_time_tool])
+                logger.info("Market price tools registered with agent")
+            except Exception as e:
+                logger.warning(f"Market price tools not available: {e}")
+            
+            # Initialize Strands Agent with Bedrock model and tools
             self.agent = Agent(
                 name="RISE-Orchestrator",
                 description="Main farming assistant orchestrator for rural Indian farmers",
                 system_prompt=system_prompt,
                 model=bedrock_model,
-                # Tools will be added in subsequent phases
-                tools=[]
+                tools=agent_tools,
             )
             
-            logger.info(f"Strands agent initialized with model {self.config.BEDROCK_MODEL_ID}")
+            logger.info(f"Strands agent initialized with model {self.config.BEDROCK_MODEL_ID} and {len(agent_tools)} tools")
             
         except Exception as e:
             logger.error(f"Failed to initialize Strands agent: {e}")

@@ -1,6 +1,7 @@
 """
 RISE Weather Data Tools
-Tools for fetching and caching weather data with location-based retrieval
+Tools for fetching and caching weather data with location-based retrieval.
+Uses Open-Meteo free API (no API key required): https://open-meteo.com/
 """
 
 import boto3
@@ -8,23 +9,41 @@ import logging
 import json
 import hashlib
 from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import requests
 import os
 
 logger = logging.getLogger(__name__)
 
+# Open-Meteo uses WMO weather codes; map to short descriptions
+_WMO_WEATHER_CODES = {
+    0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+    45: "Foggy", 48: "Depositing rime fog",
+    51: "Light drizzle", 53: "Drizzle", 55: "Dense drizzle",
+    61: "Slight rain", 63: "Moderate rain", 65: "Heavy rain",
+    66: "Light freezing rain", 67: "Freezing rain",
+    71: "Slight snow", 73: "Moderate snow", 75: "Heavy snow", 77: "Snow grains",
+    80: "Slight rain showers", 81: "Moderate rain showers", 82: "Violent rain showers",
+    85: "Slight snow showers", 86: "Heavy snow showers",
+    95: "Thunderstorm", 96: "Thunderstorm with slight hail", 99: "Thunderstorm with heavy hail",
+}
+
+
+def _weather_code_to_description(code: int) -> str:
+    """Convert Open-Meteo WMO weather code to description."""
+    return _WMO_WEATHER_CODES.get(int(code), "Unknown")
+
 
 class WeatherTools:
-    """Weather data tools for RISE farming assistant with caching"""
+    """Weather data tools for RISE farming assistant with caching (Open-Meteo free API)."""
     
     def __init__(self, region: str = "us-east-1", api_key: Optional[str] = None):
         """
-        Initialize weather tools with AWS clients
+        Initialize weather tools with AWS clients.
         
         Args:
-            region: AWS region for services
-            api_key: OpenWeatherMap API key (or from environment)
+            region: AWS region for services (DynamoDB cache).
+            api_key: Unused (kept for backward compatibility). Open-Meteo requires no key.
         """
         self.region = region
         self.dynamodb = boto3.resource('dynamodb', region_name=region)
@@ -32,21 +51,21 @@ class WeatherTools:
         # DynamoDB table for weather forecast storage
         self.weather_table = self.dynamodb.Table('RISE-WeatherForecast')
         
-        # OpenWeatherMap API configuration
-        self.api_key = api_key or os.getenv('OPENWEATHER_API_KEY', '')
-        self.base_url = "https://api.openweathermap.org/data/2.5"
+        # Open-Meteo API (free, no API key)
+        self.base_url = "https://api.open-meteo.com/v1/forecast"
+        self.api_key = api_key  # kept for backward compatibility; unused
         
         # Cache TTL: 6 hours
         self.cache_ttl = timedelta(hours=6)
         
-        logger.info(f"Weather tools initialized in region {region}")
+        logger.info(f"Weather tools initialized in region {region} (Open-Meteo)")
     
     def get_current_weather(self,
                            latitude: float,
                            longitude: float,
                            location_name: Optional[str] = None) -> Dict[str, Any]:
         """
-        Get current weather for a location
+        Get current weather for a location (Open-Meteo free API).
         
         Args:
             latitude: Location latitude
@@ -69,75 +88,54 @@ class WeatherTools:
                     **cached_data
                 }
             
-            # Fetch from API
-            url = f"{self.base_url}/weather"
+            # Open-Meteo: no API key required
             params = {
-                'lat': latitude,
-                'lon': longitude,
-                'appid': self.api_key,
-                'units': 'metric',  # Celsius
-                'lang': 'en'
+                'latitude': latitude,
+                'longitude': longitude,
+                'current': 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,precipitation',
+                'timezone': 'auto',
             }
-            
-            response = requests.get(url, params=params, timeout=10)
+            response = requests.get(self.base_url, params=params, timeout=10)
             response.raise_for_status()
-            
             data = response.json()
             
-            # Parse weather data
+            cur = data.get('current', {})
+            temp = cur.get('temperature_2m', 0)
             weather_data = {
                 'location': {
-                    'name': location_name or data.get('name', 'Unknown'),
+                    'name': location_name or 'Unknown',
                     'latitude': latitude,
                     'longitude': longitude,
-                    'country': data.get('sys', {}).get('country', 'IN')
+                    'country': 'IN'
                 },
                 'current': {
-                    'temperature': data['main']['temp'],
-                    'feels_like': data['main']['feels_like'],
-                    'temp_min': data['main']['temp_min'],
-                    'temp_max': data['main']['temp_max'],
-                    'pressure': data['main']['pressure'],
-                    'humidity': data['main']['humidity'],
-                    'weather': data['weather'][0]['main'],
-                    'weather_description': data['weather'][0]['description'],
-                    'weather_icon': data['weather'][0]['icon'],
-                    'wind_speed': data['wind']['speed'],
-                    'wind_direction': data['wind'].get('deg', 0),
-                    'clouds': data['clouds']['all'],
-                    'visibility': data.get('visibility', 10000),
-                    'rain_1h': data.get('rain', {}).get('1h', 0),
-                    'rain_3h': data.get('rain', {}).get('3h', 0)
+                    'temperature': temp,
+                    'feels_like': temp,  # Open-Meteo doesn't provide; use same as temp
+                    'temp_min': temp,
+                    'temp_max': temp,
+                    'pressure': 1013,
+                    'humidity': cur.get('relative_humidity_2m', 0),
+                    'weather': _weather_code_to_description(cur.get('weather_code', 0)),
+                    'weather_description': _weather_code_to_description(cur.get('weather_code', 0)),
+                    'weather_icon': str(cur.get('weather_code', 0)),
+                    'wind_speed': cur.get('wind_speed_10m', 0),
+                    'wind_direction': 0,
+                    'clouds': 0,
+                    'visibility': 10000,
+                    'rain_1h': cur.get('precipitation', 0),
+                    'rain_3h': 0
                 },
-                'sun': {
-                    'sunrise': datetime.fromtimestamp(data['sys']['sunrise']).isoformat(),
-                    'sunset': datetime.fromtimestamp(data['sys']['sunset']).isoformat()
-                },
-                'timestamp': datetime.fromtimestamp(data['dt']).isoformat(),
-                'timezone_offset': data.get('timezone', 19800)  # Default to IST
+                'sun': {'sunrise': '', 'sunset': ''},
+                'timestamp': cur.get('time', datetime.now(timezone.utc).isoformat()),
+                'timezone_offset': 19800
             }
             
-            # Cache the result
             self._save_to_cache(cache_key, weather_data)
-            
-            return {
-                'success': True,
-                'from_cache': False,
-                **weather_data
-            }
+            return {'success': True, 'from_cache': False, **weather_data}
         
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Weather API error: {e}")
-            return {
-                'success': False,
-                'error': f"Failed to fetch weather data: {str(e)}"
-            }
         except Exception as e:
-            logger.error(f"Weather processing error: {e}", exc_info=True)
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            logger.error(f"Weather API error: {e}", exc_info=True)
+            return {'success': False, 'error': f"Failed to fetch weather data: {str(e)}"}
     
     def get_forecast(self,
                     latitude: float,
@@ -145,146 +143,70 @@ class WeatherTools:
                     days: int = 5,
                     location_name: Optional[str] = None) -> Dict[str, Any]:
         """
-        Get weather forecast for a location
+        Get weather forecast for a location (Open-Meteo free API, up to 16 days).
         
         Args:
             latitude: Location latitude
             longitude: Location longitude
-            days: Number of days for forecast (max 5 for free tier)
+            days: Number of days for forecast
             location_name: Optional location name for display
         
         Returns:
             Dict with forecast data
         """
         try:
-            # Check cache first
             cache_key = self._get_cache_key(latitude, longitude, f'forecast_{days}')
             cached_data = self._get_from_cache(cache_key)
-            
             if cached_data:
                 logger.info(f"Cache hit for forecast at ({latitude}, {longitude})")
-                return {
-                    'success': True,
-                    'from_cache': True,
-                    **cached_data
-                }
+                return {'success': True, 'from_cache': True, **cached_data}
             
-            # Fetch from API
-            url = f"{self.base_url}/forecast"
             params = {
-                'lat': latitude,
-                'lon': longitude,
-                'appid': self.api_key,
-                'units': 'metric',
-                'lang': 'en',
-                'cnt': days * 8  # 8 forecasts per day (3-hour intervals)
+                'latitude': latitude,
+                'longitude': longitude,
+                'daily': 'temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code',
+                'timezone': 'auto',
+                'forecast_days': min(days, 16),
             }
-            
-            response = requests.get(url, params=params, timeout=10)
+            response = requests.get(self.base_url, params=params, timeout=10)
             response.raise_for_status()
-            
             data = response.json()
             
-            # Parse forecast data
-            forecast_list = []
-            daily_summary = {}
+            daily = data.get('daily', {})
+            times = daily.get('time', [])
+            max_t = daily.get('temperature_2m_max', [])
+            min_t = daily.get('temperature_2m_min', [])
+            precip = daily.get('precipitation_sum', [])
+            codes = daily.get('weather_code', [])
             
-            for item in data['list']:
-                forecast_time = datetime.fromtimestamp(item['dt'])
-                date_key = forecast_time.date().isoformat()
-                
-                forecast_item = {
-                    'datetime': forecast_time.isoformat(),
-                    'temperature': item['main']['temp'],
-                    'feels_like': item['main']['feels_like'],
-                    'temp_min': item['main']['temp_min'],
-                    'temp_max': item['main']['temp_max'],
-                    'pressure': item['main']['pressure'],
-                    'humidity': item['main']['humidity'],
-                    'weather': item['weather'][0]['main'],
-                    'weather_description': item['weather'][0]['description'],
-                    'weather_icon': item['weather'][0]['icon'],
-                    'wind_speed': item['wind']['speed'],
-                    'wind_direction': item['wind'].get('deg', 0),
-                    'clouds': item['clouds']['all'],
-                    'pop': item.get('pop', 0) * 100,  # Probability of precipitation
-                    'rain_3h': item.get('rain', {}).get('3h', 0),
-                    'visibility': item.get('visibility', 10000)
-                }
-                
-                forecast_list.append(forecast_item)
-                
-                # Build daily summary
-                if date_key not in daily_summary:
-                    daily_summary[date_key] = {
-                        'date': date_key,
-                        'temp_min': item['main']['temp_min'],
-                        'temp_max': item['main']['temp_max'],
-                        'humidity_avg': item['main']['humidity'],
-                        'rain_total': item.get('rain', {}).get('3h', 0),
-                        'weather_conditions': [item['weather'][0]['main']],
-                        'count': 1
-                    }
-                else:
-                    daily_summary[date_key]['temp_min'] = min(
-                        daily_summary[date_key]['temp_min'],
-                        item['main']['temp_min']
-                    )
-                    daily_summary[date_key]['temp_max'] = max(
-                        daily_summary[date_key]['temp_max'],
-                        item['main']['temp_max']
-                    )
-                    daily_summary[date_key]['humidity_avg'] += item['main']['humidity']
-                    daily_summary[date_key]['rain_total'] += item.get('rain', {}).get('3h', 0)
-                    daily_summary[date_key]['weather_conditions'].append(item['weather'][0]['main'])
-                    daily_summary[date_key]['count'] += 1
-            
-            # Calculate averages for daily summary
-            for date_key in daily_summary:
-                count = daily_summary[date_key]['count']
-                daily_summary[date_key]['humidity_avg'] = round(
-                    daily_summary[date_key]['humidity_avg'] / count
-                )
-                # Get most common weather condition
-                conditions = daily_summary[date_key]['weather_conditions']
-                daily_summary[date_key]['weather'] = max(set(conditions), key=conditions.count)
-                del daily_summary[date_key]['weather_conditions']
-                del daily_summary[date_key]['count']
+            daily_summary = []
+            for i in range(len(times)):
+                daily_summary.append({
+                    'date': times[i],
+                    'temp_min': min_t[i] if i < len(min_t) else 0,
+                    'temp_max': max_t[i] if i < len(max_t) else 0,
+                    'rain_total': precip[i] if i < len(precip) else 0,
+                    'weather': _weather_code_to_description(codes[i] if i < len(codes) else 0),
+                })
             
             forecast_data = {
                 'location': {
-                    'name': location_name or data['city']['name'],
+                    'name': location_name or 'Unknown',
                     'latitude': latitude,
                     'longitude': longitude,
-                    'country': data['city']['country']
+                    'country': 'IN'
                 },
-                'forecast': forecast_list,
-                'daily_summary': list(daily_summary.values()),
-                'forecast_days': days,
-                'total_forecasts': len(forecast_list)
+                'forecast': [],
+                'daily_summary': daily_summary,
+                'forecast_days': len(daily_summary),
+                'total_forecasts': len(daily_summary),
             }
-            
-            # Cache the result
             self._save_to_cache(cache_key, forecast_data)
-            
-            return {
-                'success': True,
-                'from_cache': False,
-                **forecast_data
-            }
+            return {'success': True, 'from_cache': False, **forecast_data}
         
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Forecast API error: {e}")
-            return {
-                'success': False,
-                'error': f"Failed to fetch forecast data: {str(e)}"
-            }
         except Exception as e:
-            logger.error(f"Forecast processing error: {e}", exc_info=True)
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            logger.error(f"Forecast API error: {e}", exc_info=True)
+            return {'success': False, 'error': f"Failed to fetch forecast data: {str(e)}"}
     
     def get_farming_weather_insights(self,
                                     latitude: float,
@@ -610,15 +532,20 @@ class WeatherTools:
             logger.error(f"Cache clear error: {e}")
 
 
-# Tool functions for agent integration
+# Tool functions for agent integration (Strands @tool for orchestrator)
+try:
+    from strands import tool
+except ImportError:
+    def tool(fn):
+        return fn  # no-op if Strands not installed
 
 def create_weather_tools(region: str = "us-east-1", api_key: Optional[str] = None) -> WeatherTools:
     """
-    Factory function to create weather tools instance
+    Factory function to create weather tools instance (Open-Meteo, no API key required).
     
     Args:
-        region: AWS region
-        api_key: OpenWeatherMap API key
+        region: AWS region (for DynamoDB cache)
+        api_key: Unused; kept for backward compatibility
     
     Returns:
         WeatherTools instance
@@ -626,17 +553,11 @@ def create_weather_tools(region: str = "us-east-1", api_key: Optional[str] = Non
     return WeatherTools(region=region, api_key=api_key)
 
 
+@tool
 def get_current_weather_tool(latitude: float, longitude: float, location_name: Optional[str] = None) -> str:
     """
-    Tool for getting current weather
-    
-    Args:
-        latitude: Location latitude
-        longitude: Location longitude
-        location_name: Optional location name
-    
-    Returns:
-        Current weather information
+    Get current weather for a location. Use when the user asks about today's weather, temperature, rain, or conditions.
+    Requires latitude and longitude (e.g. from user's farm or district).
     """
     tools = create_weather_tools()
     result = tools.get_current_weather(latitude, longitude, location_name)
@@ -654,17 +575,10 @@ Rain: {current['rain_1h']}mm (last hour)
         return f"Error: {result.get('error', 'Failed to fetch weather')}"
 
 
+@tool
 def get_forecast_tool(latitude: float, longitude: float, days: int = 5) -> str:
     """
-    Tool for getting weather forecast
-    
-    Args:
-        latitude: Location latitude
-        longitude: Location longitude
-        days: Number of days
-    
-    Returns:
-        Weather forecast information
+    Get weather forecast for the next few days. Use when the user asks about upcoming weather, rain, or planning farming by forecast.
     """
     tools = create_weather_tools()
     result = tools.get_forecast(latitude, longitude, days)
@@ -679,16 +593,10 @@ def get_forecast_tool(latitude: float, longitude: float, days: int = 5) -> str:
         return f"Error: {result.get('error', 'Failed to fetch forecast')}"
 
 
+@tool
 def get_farming_insights_tool(latitude: float, longitude: float) -> str:
     """
-    Tool for getting farming-specific weather insights
-    
-    Args:
-        latitude: Location latitude
-        longitude: Location longitude
-    
-    Returns:
-        Farming weather insights
+    Get farming-specific weather insights and recommendations (irrigation, planting, spraying). Use when the user asks for farming advice based on weather.
     """
     tools = create_weather_tools()
     result = tools.get_farming_weather_insights(latitude, longitude)
