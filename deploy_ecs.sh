@@ -23,11 +23,15 @@ ALB_NAME="rise-alb"
 TG_NAME="rise-tg"
 IMAGE_TAG=${IMAGE_TAG:-$(date +%Y%m%d_%H%M%S)}
 
+# Use inference profile ID (required for ConverseStream on-demand; direct model ID not supported)
+BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-global.anthropic.claude-sonnet-4-20250514-v1:0}
+
 echo "📋 Configuration:"
 echo "   AWS Region: $AWS_REGION"
 echo "   ECR Repository: $ECR_REPOSITORY_NAME"
 echo "   ECS Cluster: $CLUSTER_NAME"
 echo "   Image Tag: $IMAGE_TAG"
+echo "   Bedrock Model: $BEDROCK_MODEL_ID"
 
 # Step 1: ECR (assume it exists, just build and push)
 ECR_URI="${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}"
@@ -145,7 +149,8 @@ cat > /tmp/task-def.json << EOF
       "environment": [
         {"name": "APP_ENV", "value": "production"},
         {"name": "AWS_REGION", "value": "$AWS_REGION"},
-        {"name": "DEBUG", "value": "False"}
+        {"name": "DEBUG", "value": "False"},
+        {"name": "BEDROCK_MODEL_ID", "value": "$BEDROCK_MODEL_ID"}
       ],
       "logConfiguration": {
         "logDriver": "awslogs",

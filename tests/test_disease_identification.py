@@ -14,6 +14,7 @@ import io
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from config import Config
 from tools.disease_identification_tools import DiseaseIdentificationTools
 
 
@@ -61,7 +62,7 @@ class TestDiseaseIdentificationTools:
     def test_initialization(self, disease_tools):
         """Test tool initialization"""
         assert disease_tools.region == 'us-east-1'
-        assert disease_tools.model_id == 'anthropic.claude-3-sonnet-20240229-v1:0'
+        assert disease_tools.model_id == Config.BEDROCK_MODEL_ID
         assert disease_tools.severity_levels == ['low', 'medium', 'high', 'critical']
     
     def test_validate_image_quality_valid(self, disease_tools, sample_image):

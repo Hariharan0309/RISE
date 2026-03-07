@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from config import Config
 from tools.fertilizer_recommendation_tools import FertilizerRecommendationTools
 
 
@@ -74,7 +75,7 @@ class TestFertilizerRecommendationTools:
     def test_initialization(self, fertilizer_tools):
         """Test tool initialization"""
         assert fertilizer_tools.region == 'us-east-1'
-        assert fertilizer_tools.model_id == 'anthropic.claude-3-sonnet-20240229-v1:0'
+        assert fertilizer_tools.model_id == Config.BEDROCK_MODEL_ID
         assert 'seedling' in fertilizer_tools.growth_stages
         assert 'vegetative' in fertilizer_tools.growth_stages
         assert 'flowering' in fertilizer_tools.growth_stages

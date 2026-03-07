@@ -14,6 +14,7 @@ import io
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from config import Config
 from tools.soil_analysis_tools import SoilAnalysisTools
 
 
@@ -71,7 +72,7 @@ class TestSoilAnalysisTools:
     def test_initialization(self, soil_tools):
         """Test tool initialization"""
         assert soil_tools.region == 'us-east-1'
-        assert soil_tools.model_id == 'anthropic.claude-3-sonnet-20240229-v1:0'
+        assert soil_tools.model_id == Config.BEDROCK_MODEL_ID
         assert 'clay' in soil_tools.soil_types
         assert 'loam' in soil_tools.soil_types
         assert soil_tools.fertility_levels == ['low', 'medium', 'high']

@@ -30,8 +30,9 @@ class ClimateAdaptiveTools:
         # DynamoDB table for climate analysis storage
         self.climate_table = self.dynamodb.Table('RISE-ClimateAnalysis')
         
-        # Model configuration
-        self.model_id = 'anthropic.claude-3-sonnet-20240229-v1:0'
+        # Model configuration (use active Bedrock model from config)
+        from config import Config
+        self.model_id = Config.BEDROCK_MODEL_ID
         
         logger.info(f"Climate-adaptive tools initialized in region {region}")
     

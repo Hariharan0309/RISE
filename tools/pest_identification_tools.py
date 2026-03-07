@@ -35,8 +35,9 @@ class PestIdentificationTools:
         self.pest_diagnosis_table = self.dynamodb.Table('RISE-PestDiagnosisHistory')
         self.pest_knowledge_table = self.dynamodb.Table('RISE-PestKnowledgeBase')
         
-        # Model configuration
-        self.model_id = 'anthropic.claude-3-sonnet-20240229-v1:0'
+        # Model configuration (use active Bedrock model from config)
+        from config import Config
+        self.model_id = Config.BEDROCK_MODEL_ID
         
         # Lifecycle stages
         self.lifecycle_stages = ['egg', 'larva', 'pupa', 'nymph', 'adult']

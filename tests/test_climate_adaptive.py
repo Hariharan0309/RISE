@@ -12,6 +12,7 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from config import Config
 from tools.climate_adaptive_tools import ClimateAdaptiveTools, create_climate_adaptive_tools
 
 
@@ -64,7 +65,7 @@ class TestClimateAdaptiveTools:
     def test_initialization(self, climate_tools):
         """Test ClimateAdaptiveTools initialization"""
         assert climate_tools.region == 'us-east-1'
-        assert climate_tools.model_id == 'anthropic.claude-3-sonnet-20240229-v1:0'
+        assert climate_tools.model_id == Config.BEDROCK_MODEL_ID
     
     def test_calculate_climate_trends(self, climate_tools, sample_historical_weather):
         """Test climate trend calculation"""

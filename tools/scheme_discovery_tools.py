@@ -92,8 +92,9 @@ Based on this profile, identify:
 Format as JSON with keys: relevant_categories, farmer_needs, priority_areas, estimated_benefits"""
 
             # Use Amazon Bedrock for analysis
+            from config import Config
             response = self.bedrock.invoke_model(
-                modelId='anthropic.claude-3-sonnet-20240229-v1:0',
+                modelId=Config.BEDROCK_MODEL_ID,
                 body=json.dumps({
                     'anthropic_version': 'bedrock-2023-05-31',
                     'max_tokens': 1000,

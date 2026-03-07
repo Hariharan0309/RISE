@@ -178,7 +178,7 @@ class ContextTools:
     
     def summarize_conversation(self,
                               session_id: str,
-                              model_id: str = 'anthropic.claude-3-haiku-20240307-v1:0') -> Dict[str, Any]:
+                              model_id: str = 'anthropic.claude-3-5-haiku-20241022-v1:0') -> Dict[str, Any]:
         """
         Summarize a long conversation using Amazon Bedrock
         

@@ -25,7 +25,7 @@ dynamodb = boto3.resource('dynamodb')
 S3_BUCKET = os.environ.get('S3_BUCKET', 'rise-application-data')
 DIAGNOSIS_TABLE = os.environ.get('DIAGNOSIS_TABLE', 'RISE-DiagnosisHistory')
 MAX_IMAGE_SIZE = int(os.environ.get('MAX_IMAGE_SIZE', 5 * 1024 * 1024))  # 5MB
-BEDROCK_MODEL_ID = 'anthropic.claude-3-sonnet-20240229-v1:0'
+BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'global.anthropic.claude-sonnet-4-20250514-v1:0')
 
 # DynamoDB table
 diagnosis_table = dynamodb.Table(DIAGNOSIS_TABLE)

@@ -205,7 +205,7 @@ Text: {content[:1000]}"""
             }
             
             response = self.bedrock_client.invoke_model(
-                modelId='anthropic.claude-3-haiku-20240307-v1:0',
+                modelId='anthropic.claude-3-5-haiku-20241022-v1:0',
                 body=json.dumps(request_body)
             )
             

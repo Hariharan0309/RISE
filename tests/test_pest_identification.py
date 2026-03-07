@@ -14,6 +14,7 @@ import io
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from config import Config
 from tools.pest_identification_tools import PestIdentificationTools
 
 
@@ -62,7 +63,7 @@ class TestPestIdentificationTools:
     def test_initialization(self, pest_tools):
         """Test tool initialization"""
         assert pest_tools.region == 'us-east-1'
-        assert pest_tools.model_id == 'anthropic.claude-3-sonnet-20240229-v1:0'
+        assert pest_tools.model_id == Config.BEDROCK_MODEL_ID
         assert pest_tools.lifecycle_stages == ['egg', 'larva', 'pupa', 'nymph', 'adult']
         assert pest_tools.severity_levels == ['low', 'medium', 'high', 'critical']
     

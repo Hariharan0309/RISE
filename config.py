@@ -18,8 +18,9 @@ class Config:
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
     AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")  # For temporary credentials
     
-    # Amazon Bedrock Configuration
-    BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-sonnet-20240229-v1:0")
+    # Amazon Bedrock: use inference profile ID (required for Converse/ConverseStream on-demand)
+    # Direct model ID anthropic.claude-sonnet-4-* is not supported for on-demand; use profile instead.
+    BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "global.anthropic.claude-sonnet-4-20250514-v1:0")
     BEDROCK_REGION = os.getenv("BEDROCK_REGION", "us-east-1")
     
     # Application Configuration

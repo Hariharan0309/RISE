@@ -196,8 +196,9 @@ Respond with JSON only:
                 'temperature': 0.3
             }
             
+            from config import Config
             response = self.bedrock_client.invoke_model(
-                modelId='anthropic.claude-3-sonnet-20240229-v1:0',
+                modelId=Config.BEDROCK_MODEL_ID,
                 body=json.dumps(request_body)
             )
             

@@ -22,7 +22,7 @@ RISE is a comprehensive, voice-first AI assistant designed to empower smallholde
 - **AI Framework:** AWS Strands Agents SDK
 - **Frontend:** Streamlit
 - **AI/ML Services:** Amazon Bedrock (Claude 3 Sonnet)
-- **Cloud Platform:** AWS (Lambda, DynamoDB, S3, API Gateway)
+- **Cloud Platform:** AWS (DynamoDB, S3, API Gateway, ECS for app; Lambdas optional)
 - **Languages:** Python 3.13+
 
 ## Project Structure
@@ -136,6 +136,13 @@ This checks:
 - ✅ S3 bucket configured
 - ✅ Bedrock model access enabled
 - ✅ Overall infrastructure status
+
+### Lambdas and the Chatbot
+
+- **Lambda functions are not deployed by default.** The CDK stack in `infrastructure/` creates DynamoDB, S3, API Gateway, CloudFront, and IAM roles (including a Bedrock role for future Lambdas), but it does **not** define or deploy the Lambda handler code in `tools/*_lambda.py` (e.g. `image_analysis_lambda`, `pest_analysis_lambda`, `soil_analysis_lambda`, `fertilizer_recommendation_lambda`, etc.).
+- **The chatbot does not use those Lambdas.** The Strands orchestrator in `agents/orchestrator.py` uses Bedrock (ConverseStream) with **no tools registered** (`tools=[]`). Image analysis from the chat flow is a placeholder (Phase 3). All text chat is handled by the LLM only.
+- **The Streamlit app uses in-process tools, not Lambdas.** For example, the image uploader (`ui/image_uploader.py`) uses `DiseaseIdentificationTools` directly in the same process and calls Bedrock from the app. So the current deployment (e.g. ECS or local Streamlit) does not require any Lambda functions to be deployed for the chatbot or image features to work.
+- The `tools/*_lambda.py` modules are optional entry points for API Gateway, event-driven pipelines, or other serverless callers. If you want to expose those as HTTP APIs or event handlers, you would need to add Lambda resources to the CDK stack (or a separate stack) and deploy them.
 
 ## Development
 

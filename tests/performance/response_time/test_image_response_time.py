@@ -139,7 +139,7 @@ class TestImageResponseTime(unittest.TestCase):
             time.sleep(0.2)
             
             response = mock_bedrock.invoke_model(
-                modelId='anthropic.claude-3-sonnet-20240229-v1:0',
+                modelId='anthropic.claude-sonnet-4-20250514-v1:0',
                 body=json.dumps({
                     'anthropic_version': 'bedrock-2023-05-31',
                     'max_tokens': 1000,
@@ -239,7 +239,7 @@ class TestImageResponseTime(unittest.TestCase):
             time.sleep(0.2)  # Simulate AI processing
             
             response = mock_bedrock.invoke_model(
-                modelId='anthropic.claude-3-sonnet-20240229-v1:0',
+                modelId='anthropic.claude-sonnet-4-20250514-v1:0',
                 body=json.dumps({
                     'messages': [{
                         'role': 'user',

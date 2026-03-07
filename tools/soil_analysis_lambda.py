@@ -25,7 +25,7 @@ dynamodb = boto3.resource('dynamodb')
 S3_BUCKET = os.environ.get('S3_BUCKET', 'rise-application-data')
 FARM_DATA_TABLE = os.environ.get('FARM_DATA_TABLE', 'RISE-FarmData')
 MAX_IMAGE_SIZE = int(os.environ.get('MAX_IMAGE_SIZE', 5 * 1024 * 1024))  # 5MB
-BEDROCK_MODEL_ID = 'anthropic.claude-3-sonnet-20240229-v1:0'
+BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'global.anthropic.claude-sonnet-4-20250514-v1:0')
 
 # DynamoDB table
 farm_data_table = dynamodb.Table(FARM_DATA_TABLE)

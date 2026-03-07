@@ -136,7 +136,7 @@ class TestVoiceResponseTime(unittest.TestCase):
         def process_query(query_text):
             """Simulate AI query processing."""
             response = mock_bedrock.invoke_model(
-                modelId='anthropic.claude-3-sonnet-20240229-v1:0',
+                modelId='anthropic.claude-sonnet-4-20250514-v1:0',
                 body=json.dumps({
                     'anthropic_version': 'bedrock-2023-05-31',
                     'max_tokens': 500,
@@ -252,7 +252,7 @@ class TestVoiceResponseTime(unittest.TestCase):
             # 3. Process with AI
             query_text = "मेरी गेहूं की फसल में पीले धब्बे हैं"
             response = mock_bedrock.invoke_model(
-                modelId='anthropic.claude-3-sonnet-20240229-v1:0',
+                modelId='anthropic.claude-sonnet-4-20250514-v1:0',
                 body=json.dumps({
                     'messages': [{'role': 'user', 'content': query_text}]
                 })

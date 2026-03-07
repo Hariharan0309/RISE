@@ -226,7 +226,7 @@ Keep it concise, professional, and persuasive. Write in both Hindi and English f
             
             # Call Bedrock for AI-generated request
             response = self.bedrock.invoke_model(
-                modelId='anthropic.claude-3-haiku-20240307-v1:0',
+                modelId='anthropic.claude-3-5-haiku-20241022-v1:0',
                 body=json.dumps({
                     'anthropic_version': 'bedrock-2023-05-31',
                     'max_tokens': 1500,
@@ -438,7 +438,7 @@ Format your response as a structured analysis.
             
             # Call Bedrock for AI analysis
             response = self.bedrock.invoke_model(
-                modelId='anthropic.claude-3-haiku-20240307-v1:0',
+                modelId='anthropic.claude-3-5-haiku-20241022-v1:0',
                 body=json.dumps({
                     'anthropic_version': 'bedrock-2023-05-31',
                     'max_tokens': 2000,

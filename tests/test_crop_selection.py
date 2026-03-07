@@ -4,6 +4,7 @@ Tests for crop selection tools
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
+from config import Config
 from tools.crop_selection_tools import (
     CropSelectionTools,
     create_crop_selection_tools,
@@ -67,7 +68,7 @@ class TestCropSelectionTools:
         tools = CropSelectionTools(region='us-east-1')
         
         assert tools.region == 'us-east-1'
-        assert tools.model_id == 'anthropic.claude-3-sonnet-20240229-v1:0'
+        assert tools.model_id == Config.BEDROCK_MODEL_ID
         assert len(tools.seasons) == 4
     
     def test_recommend_crops_success(self, mock_bedrock_client, mock_dynamodb, 
