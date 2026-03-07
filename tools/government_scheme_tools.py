@@ -620,7 +620,13 @@ Format as JSON."""
             return obj
 
 
-# Tool functions for agent integration
+# Tool functions for agent integration (Strands @tool for orchestrator)
+try:
+    from strands import tool
+except ImportError:
+    def tool(fn):
+        return fn  # no-op if Strands not installed
+
 
 def create_government_scheme_tools(region: str = "us-east-1") -> GovernmentSchemeTools:
     """
@@ -635,9 +641,10 @@ def create_government_scheme_tools(region: str = "us-east-1") -> GovernmentSchem
     return GovernmentSchemeTools(region=region)
 
 
+@tool
 def search_schemes_tool(state: Optional[str] = None, category: Optional[str] = None) -> str:
     """
-    Tool for searching government schemes
+    Search government agricultural schemes by state and/or category. Use when the user asks about schemes, subsidies, or government support.
     
     Args:
         state: State name (None for central schemes)
@@ -667,9 +674,10 @@ def search_schemes_tool(state: Optional[str] = None, category: Optional[str] = N
         return f"Error: {result.get('error', 'Failed to search schemes')}"
 
 
+@tool
 def get_scheme_details_tool(scheme_id: str) -> str:
     """
-    Tool for getting detailed scheme information
+    Get full details for a government scheme by scheme_id. Use after search_schemes_tool when the user wants eligibility, documents, or application steps.
     
     Args:
         scheme_id: Unique scheme identifier

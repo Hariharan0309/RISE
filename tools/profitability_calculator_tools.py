@@ -965,16 +965,25 @@ class ProfitabilityCalculatorTools:
             logger.error(f"Failed to store profitability analysis: {e}")
 
 
-# Tool functions for agent integration
+# Tool functions for agent integration (Strands @tool for orchestrator)
+try:
+    from strands import tool
+except ImportError:
+    def tool(fn):
+        return fn  # no-op if Strands not installed
+
 
 def create_profitability_calculator_tools(region: str = "us-east-1") -> ProfitabilityCalculatorTools:
     """Factory function to create profitability calculator tools instance"""
     return ProfitabilityCalculatorTools(region=region)
 
 
-def calculate_profitability_tool(crop_name: str, farm_size_acres: float, 
-                                 location: Dict[str, Any], soil_type: str = 'loamy') -> str:
-    """Tool for calculating crop profitability"""
+@tool
+def calculate_profitability_tool(crop_name: str, farm_size_acres: float,
+                                location: Dict[str, Any], soil_type: str = 'loamy') -> str:
+    """
+    Calculate crop profitability (costs, yield, revenue, ROI) for a crop and farm size. Use when the user asks about profit, ROI, or whether to grow a crop. Location can be e.g. {'state': 'Punjab'}.
+    """
     tools = create_profitability_calculator_tools()
     result = tools.calculate_comprehensive_profitability(
         crop_name, farm_size_acres, location, soil_type

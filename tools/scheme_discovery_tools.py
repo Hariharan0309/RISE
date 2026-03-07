@@ -659,7 +659,13 @@ Format as JSON with keys: relevant_categories, farmer_needs, priority_areas, est
             return obj
 
 
-# Tool functions for agent integration
+# Tool functions for agent integration (Strands @tool for orchestrator)
+try:
+    from strands import tool
+except ImportError:
+    def tool(fn):
+        return fn  # no-op if Strands not installed
+
 
 def create_scheme_discovery_tools(region: str = "us-east-1") -> SchemeDiscoveryTools:
     """
@@ -674,9 +680,10 @@ def create_scheme_discovery_tools(region: str = "us-east-1") -> SchemeDiscoveryT
     return SchemeDiscoveryTools(region=region)
 
 
+@tool
 def recommend_schemes_tool(farmer_profile: Dict[str, Any]) -> str:
     """
-    Tool for recommending schemes to farmers
+    Recommend government schemes for a farmer based on their profile (location, land, crops). Use when the user wants personalized scheme suggestions.
     
     Args:
         farmer_profile: Farmer information
@@ -708,9 +715,10 @@ def recommend_schemes_tool(farmer_profile: Dict[str, Any]) -> str:
         return f"Error: {result.get('error', 'Failed to recommend schemes')}"
 
 
+@tool
 def check_eligibility_tool(farmer_profile: Dict[str, Any], scheme_id: str) -> str:
     """
-    Tool for checking scheme eligibility
+    Check if a farmer is eligible for a specific scheme by scheme_id. Use after recommending or searching schemes.
     
     Args:
         farmer_profile: Farmer information

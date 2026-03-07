@@ -856,16 +856,25 @@ class LoanCreditTools:
         return recommendations.get(status, 'Assess your financial situation carefully.')
 
 
-# Tool functions for agent integration
+# Tool functions for agent integration (Strands @tool for orchestrator)
+try:
+    from strands import tool
+except ImportError:
+    def tool(fn):
+        return fn  # no-op if Strands not installed
+
 
 def create_loan_credit_tools(region: str = "us-east-1") -> LoanCreditTools:
     """Factory function to create loan and credit tools instance"""
     return LoanCreditTools(region=region)
 
 
-def assess_financing_needs_tool(farmer_profile: Dict[str, Any], farm_details: Dict[str, Any], 
+@tool
+def assess_financing_needs_tool(farmer_profile: Dict[str, Any], farm_details: Dict[str, Any],
                                 purpose: str) -> str:
-    """Tool for assessing financing needs"""
+    """
+    Assess financing needs and loan eligibility for a farmer. Use when the user asks about loans, credit, or how much they can borrow. farmer_profile: name, age, income, expenses, credit_score; farm_details: farm_size_acres, soil_type; purpose: e.g. crop_cultivation, equipment_purchase.
+    """
     tools = create_loan_credit_tools()
     result = tools.assess_financing_needs(farmer_profile, farm_details, purpose)
     

@@ -344,6 +344,43 @@ def render_sidebar():
         
         st.divider()
         
+        # Feature / page navigation
+        st.markdown("### 📍 Go to")
+        page_options = [
+            "💬 Chat & Diagnosis",
+            "👥 Farmer Forum",
+            "🏛️ Scheme Discovery",
+            "📝 Scheme Application",
+            "📊 Market Prices",
+            "📅 Equipment Booking",
+            "🛒 Equipment Marketplace",
+            "🤝 Buying Groups",
+            "🚚 Supplier Negotiation",
+            "📦 Buyer Connection",
+            "🌾 Profitability Calculator",
+            "💰 Loan Calculator",
+            "🔔 Alert Customization",
+            "🌍 Local Economy",
+            "📚 Best Practices",
+            "🌤️ Weather Alerts",
+            "🎤 Voice Input",
+        ]
+        default_idx = 0
+        if "current_page" not in st.session_state:
+            st.session_state.current_page = page_options[0]
+        current_idx = page_options.index(st.session_state.current_page) if st.session_state.current_page in page_options else 0
+        selected_page = st.selectbox(
+            "Feature",
+            page_options,
+            index=current_idx,
+            key="page_selector"
+        )
+        if selected_page != st.session_state.current_page:
+            st.session_state.current_page = selected_page
+            st.rerun()
+        
+        st.divider()
+        
         # Language selector
         st.markdown("### 🌐 Language / भाषा")
         
@@ -430,46 +467,111 @@ def render_sidebar():
         st.caption("Built with Strands Agents & AWS Bedrock")
 
 def render_chat_interface():
-    """Render main chat interface"""
+    """Render main interface - dispatches to selected page."""
     
-    # Inject offline support
     inject_offline_support()
-    
-    # Render offline indicator
     from ui.offline_indicator import render_offline_indicator
     render_offline_indicator(st.session_state.language)
     
-    # Header
-    st.markdown('<div class="main-header">', unsafe_allow_html=True)
-    st.markdown(f"# 🌾 Welcome, {st.session_state.user_name}!")
-    st.markdown("### Ask me anything about farming, crops, weather, markets, and more")
-    st.markdown('</div>', unsafe_allow_html=True)
+    page = st.session_state.get("current_page", "💬 Chat & Diagnosis")
     
-    # Feature badges
-    st.markdown("""
-    <div style="text-align: center; margin: 1rem 0;">
-        <span class="feature-badge">🌿 Crop Diagnosis</span>
-        <span class="feature-badge">🌍 Soil Analysis</span>
-        <span class="feature-badge">☁️ Weather Alerts</span>
-        <span class="feature-badge">💰 Market Prices</span>
-        <span class="feature-badge">🤝 Resource Sharing</span>
-        <span class="feature-badge">📋 Govt Schemes</span>
-    </div>
-    """, unsafe_allow_html=True)
+    # Header (compact when not on home)
+    if page == "💬 Chat & Diagnosis":
+        st.markdown('<div class="main-header">', unsafe_allow_html=True)
+        st.markdown(f"# 🌾 Welcome, {st.session_state.user_name}!")
+        st.markdown("### Ask me anything about farming, crops, weather, markets, and more")
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="text-align: center; margin: 1rem 0;">
+            <span class="feature-badge">🌿 Crop Diagnosis</span>
+            <span class="feature-badge">🌍 Soil Analysis</span>
+            <span class="feature-badge">☁️ Weather Alerts</span>
+            <span class="feature-badge">💰 Market Prices</span>
+            <span class="feature-badge">🤝 Resource Sharing</span>
+            <span class="feature-badge">📋 Govt Schemes</span>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("---")
+        tab1, tab2, tab3 = st.tabs(["💬 Chat Assistant", "📸 Disease Diagnosis", "📜 Diagnosis History"])
+        with tab1:
+            render_chat_tab()
+        with tab2:
+            render_disease_diagnosis_tab()
+        with tab3:
+            render_diagnosis_history_tab()
+        return
     
+    # Minimal header for other pages
+    st.markdown(f"# {page}")
     st.markdown("---")
     
-    # Create tabs for different features
-    tab1, tab2, tab3 = st.tabs(["💬 Chat Assistant", "📸 Disease Diagnosis", "📜 Diagnosis History"])
+    # Default location for UIs that need lat/lon (e.g. Delhi)
+    user_location = getattr(st.session_state, "user_location", {"latitude": 28.6139, "longitude": 77.2090})
     
-    with tab1:
-        render_chat_tab()
-    
-    with tab2:
-        render_disease_diagnosis_tab()
-    
-    with tab3:
-        render_diagnosis_history_tab()
+    try:
+        if page == "👥 Farmer Forum":
+            from tools.forum_tools import create_forum_tools
+            if "forum_tools" not in st.session_state:
+                st.session_state.forum_tools = create_forum_tools()
+            from ui.farmer_forum import render_farmer_forum
+            render_farmer_forum(st.session_state.forum_tools, st.session_state.user_id, st.session_state.language)
+        elif page == "🏛️ Scheme Discovery":
+            from ui.scheme_discovery import render_scheme_discovery
+            render_scheme_discovery()
+        elif page == "📝 Scheme Application":
+            from ui.scheme_application import render_scheme_application
+            render_scheme_application()
+        elif page == "📊 Market Prices":
+            from tools.market_price_tools import create_market_price_tools
+            if "market_tools" not in st.session_state:
+                st.session_state.market_tools = create_market_price_tools()
+            from ui.market_price_dashboard import render_market_price_dashboard
+            render_market_price_dashboard(st.session_state.market_tools, user_location)
+        elif page == "📅 Equipment Booking":
+            from ui.equipment_booking import render_equipment_booking_management
+            render_equipment_booking_management()
+        elif page == "🛒 Equipment Marketplace":
+            from ui.equipment_marketplace import render_equipment_marketplace
+            render_equipment_marketplace()
+        elif page == "🤝 Buying Groups":
+            from ui.buying_groups import render_buying_groups
+            render_buying_groups()
+        elif page == "🚚 Supplier Negotiation":
+            from ui.supplier_negotiation import render_supplier_negotiation_ui
+            render_supplier_negotiation_ui()
+        elif page == "🤝 Buyer Connection":
+            from ui.buyer_connection_dashboard import render_buyer_connection_dashboard
+            render_buyer_connection_dashboard()
+        elif page == "🌾 Profitability Calculator":
+            from ui.profitability_calculator import render_profitability_calculator
+            render_profitability_calculator()
+        elif page == "💰 Loan Calculator":
+            from ui.loan_calculator import render_loan_calculator
+            render_loan_calculator()
+        elif page == "🔔 Alert Customization":
+            from ui.alert_customization import render_alert_customization
+            render_alert_customization()
+        elif page == "🌍 Local Economy":
+            from ui.local_economy_dashboard import render_local_economy_dashboard
+            render_local_economy_dashboard()
+        elif page == "📚 Best Practices":
+            from tools.best_practice_tools import BestPracticeTools
+            if "best_practice_tools" not in st.session_state:
+                st.session_state.best_practice_tools = BestPracticeTools()
+            from ui.best_practices_library import render_best_practices_library
+            render_best_practices_library(st.session_state.best_practice_tools, st.session_state.user_id, st.session_state.language)
+        elif page == "🌤️ Weather Alerts":
+            from ui.weather_alerts import render_weather_alerts_dashboard
+            render_weather_alerts_dashboard(st.session_state.user_id, user_location)
+        elif page == "🎤 Voice Input":
+            from ui.voice_recorder import render_voice_recorder
+            render_voice_recorder(key="main_voice_recorder")
+        else:
+            st.info("Select a feature from the sidebar.")
+    except Exception as e:
+        st.error(f"Error loading {page}: {e}")
+        import traceback
+        st.code(traceback.format_exc())
 
 
 def render_chat_tab():

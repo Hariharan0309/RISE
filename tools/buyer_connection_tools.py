@@ -520,7 +520,13 @@ class BuyerConnectionTools:
             }
 
 
-# Tool functions for agent integration
+# Tool functions for agent integration (Strands @tool for orchestrator)
+try:
+    from strands import tool
+except ImportError:
+    def tool(fn):
+        return fn  # no-op if Strands not installed
+
 
 def create_buyer_connection_tools(region: str = "us-east-1") -> BuyerConnectionTools:
     """
@@ -591,9 +597,10 @@ Top Matches:
         return f"Error: {result.get('error', 'Failed to create listing')}"
 
 
+@tool
 def get_quality_standards_tool(crop_name: str) -> str:
     """
-    Tool for getting quality standards
+    Get quality standards and grades for a crop (for selling to buyers). Use when the user asks about quality, grades, or what buyers expect.
     
     Args:
         crop_name: Name of the crop
@@ -626,9 +633,10 @@ Quality Parameters:
         return f"Error: {result.get('error', 'Failed to fetch quality standards')}"
 
 
+@tool
 def get_price_benchmarks_tool(crop_name: str, location: Dict[str, Any]) -> str:
     """
-    Tool for getting price benchmarks
+    Get price benchmarks for a crop in a location (e.g. {'state': 'Punjab'}). Use when the user asks about typical prices or market rates for selling.
     
     Args:
         crop_name: Name of the crop

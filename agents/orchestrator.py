@@ -250,7 +250,13 @@ Help farmers improve agricultural outcomes, access fair markets, and adopt susta
 - Adapt recommendations to local climate and soil conditions
 - Consider seasonal timing in all advice
 
-**Using live data:** You have tools to fetch current weather and market prices. When the user asks about weather, forecast, or crop prices, use these tools with the user's location (latitude/longitude). If they have not given coordinates, ask for their district or use a typical coordinate for their state to give useful local information.
+**Using your tools:**
+- **Weather**: Use get_current_weather_tool, get_forecast_tool, get_farming_insights_tool with the user's latitude/longitude. If they have not given coordinates, ask for their district or use a typical coordinate for their state.
+- **Market prices**: Use get_current_prices_tool, get_price_history_tool, get_optimal_selling_time_tool for crop prices and selling advice (latitude/longitude and crop name required).
+- **Government schemes**: Use search_schemes_tool (state, category) to find schemes; use get_scheme_details_tool(scheme_id) for full details. Use recommend_schemes_tool(farmer_profile) for personalized scheme recommendations and check_eligibility_tool(farmer_profile, scheme_id) to check eligibility.
+- **Profitability**: Use calculate_profitability_tool for crop profitability (crop_name, farm_size_acres, state, and optional inputs).
+- **Loans / credit**: Use assess_financing_needs_tool with farmer_profile and farm_details for loan eligibility and financing needs.
+- **Buyer / quality**: Use get_quality_standards_tool(crop_name) and get_price_benchmarks_tool(crop_name, location) when the user asks about quality standards or price benchmarks for selling.
 
 You are a trusted partner in the farmer's journey toward better yields, fair prices, and sustainable agriculture."""
         
@@ -282,7 +288,37 @@ You are a trusted partner in the farmer's journey toward better yields, fair pri
                 logger.info("Market price tools registered with agent")
             except Exception as e:
                 logger.warning(f"Market price tools not available: {e}")
-            
+            try:
+                from tools.government_scheme_tools import search_schemes_tool, get_scheme_details_tool
+                agent_tools.extend([search_schemes_tool, get_scheme_details_tool])
+                logger.info("Government scheme tools registered with agent")
+            except Exception as e:
+                logger.warning(f"Government scheme tools not available: {e}")
+            try:
+                from tools.scheme_discovery_tools import recommend_schemes_tool, check_eligibility_tool
+                agent_tools.extend([recommend_schemes_tool, check_eligibility_tool])
+                logger.info("Scheme discovery tools registered with agent")
+            except Exception as e:
+                logger.warning(f"Scheme discovery tools not available: {e}")
+            try:
+                from tools.profitability_calculator_tools import calculate_profitability_tool
+                agent_tools.append(calculate_profitability_tool)
+                logger.info("Profitability calculator tool registered with agent")
+            except Exception as e:
+                logger.warning(f"Profitability calculator tool not available: {e}")
+            try:
+                from tools.loan_credit_tools import assess_financing_needs_tool
+                agent_tools.append(assess_financing_needs_tool)
+                logger.info("Loan/credit tool registered with agent")
+            except Exception as e:
+                logger.warning(f"Loan/credit tool not available: {e}")
+            try:
+                from tools.buyer_connection_tools import get_quality_standards_tool, get_price_benchmarks_tool
+                agent_tools.extend([get_quality_standards_tool, get_price_benchmarks_tool])
+                logger.info("Buyer connection tools registered with agent")
+            except Exception as e:
+                logger.warning(f"Buyer connection tools not available: {e}")
+
             # Initialize Strands Agent with Bedrock model and tools
             self.agent = Agent(
                 name="RISE-Orchestrator",
