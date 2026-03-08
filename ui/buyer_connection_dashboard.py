@@ -380,6 +380,17 @@ def render_price_benchmarks(buyer_tools):
             })
             
             st.bar_chart(price_data.set_index('Price Type'))
+            
+            with st.expander("🤖 AI tips to get better prices"):
+                if st.button("Get AI tips", key="buyer_price_ai_btn"):
+                    with st.spinner("Generating tips..."):
+                        from tools.ai_insights import get_ai_insight
+                        prompt = f"""You are a farm produce marketing advisor. In 2 short paragraphs, give the farmer 3-5 practical tips to get a better price when selling {crop_name}. Market average ₹{result['market_average']:.2f}, range ₹{result['market_range']['min']}-₹{result['market_range']['max']}. Recommended fair price ₹{fair_range['recommended']}. Be specific and actionable."""
+                        ai = get_ai_insight(prompt)
+                    if ai.get('success'):
+                        st.markdown(ai.get('text', ''))
+                    else:
+                        st.error(ai.get('error'))
         else:
             st.error(f"Failed to fetch benchmarks: {result.get('error')}")
 
@@ -450,6 +461,18 @@ def render_quality_standards(buyer_tools):
                     st.write(f"✓ {param_name}: Minimum {values['min']}")
             
             st.info("💡 Tip: Premium grade crops can fetch 10-20% higher prices in the market!")
+            
+            with st.expander("🤖 AI tips to meet quality standards"):
+                if st.button("Get AI tips", key="buyer_quality_ai_btn"):
+                    with st.spinner("Generating tips..."):
+                        from tools.ai_insights import get_ai_insight
+                        params_str = "; ".join(f"{k}: {v}" for k, v in standards['parameters'].items())
+                        prompt = f"""You are an agricultural quality advisor. For {crop_name}, the buyer quality parameters are: {params_str}. In 2 short paragraphs, give the farmer 3-5 practical, actionable tips to improve their produce to meet these standards and achieve premium grade. Be specific (e.g. storage, sorting, timing)."""
+                        ai = get_ai_insight(prompt)
+                    if ai.get('success'):
+                        st.markdown(ai.get('text', ''))
+                    else:
+                        st.error(ai.get('error'))
         else:
             st.error(f"Failed to fetch standards: {result.get('error')}")
 

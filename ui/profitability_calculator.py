@@ -214,6 +214,16 @@ def render_profitability_calculator():
             
             st.info(f"**Recommendation:** {risk_data['recommendation']}")
             
+            # AI analysis
+            if st.button("🤖 Get AI Insights", key="ai_insights_single"):
+                with st.spinner("Generating AI analysis..."):
+                    ai_result = tools.get_ai_profitability_analysis(result)
+                if ai_result.get('success'):
+                    st.subheader("🤖 AI Insights")
+                    st.markdown(ai_result.get('analysis', ''))
+                else:
+                    st.error(ai_result.get('error', 'Could not generate AI insights'))
+            
             # Projections
             st.subheader("📈 Profit Projections")
             projections = result['projections']

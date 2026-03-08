@@ -102,16 +102,18 @@ def render_posts_feed(forum_tools, user_id: str, user_language: str, translation
         result = forum_tools.get_posts(category=category, limit=20)
     
     if result['success'] and result['posts']:
-        for post in result['posts']:
-            render_post_card(forum_tools, post, user_id, user_language, translation_enabled)
+        for i, post in enumerate(result['posts']):
+            render_post_card(forum_tools, post, user_id, user_language, translation_enabled, key_prefix=f"feed_{i}")
     elif result['success']:
         st.info("📭 No posts found. Be the first to start a discussion!")
     else:
         st.error(f"❌ Failed to load posts: {result.get('error')}")
 
 
-def render_post_card(forum_tools, post: Dict[str, Any], user_id: str, user_language: str, translation_enabled: bool):
-    """Render a single post card"""
+def render_post_card(forum_tools, post: Dict[str, Any], user_id: str, user_language: str, translation_enabled: bool, key_prefix: Optional[str] = None):
+    """Render a single post card. key_prefix ensures unique Streamlit keys when the same post appears in multiple sections."""
+    pid = post.get('post_id', '')
+    k = key_prefix if key_prefix is not None else pid
     
     # Translate if needed
     display_post = post
@@ -181,7 +183,7 @@ def render_post_card(forum_tools, post: Dict[str, Any], user_id: str, user_langu
             st.caption(f"💬 {post.get('replies_count', 0)} replies")
         
         with col3:
-            if st.button(f"👍 {post.get('likes_count', 0)}", key=f"like_{post['post_id']}"):
+            if st.button(f"👍 {post.get('likes_count', 0)}", key=f"like_{k}"):
                 like_result = forum_tools.like_post(post['post_id'], user_id)
                 if like_result['success']:
                     st.success("Liked!")
@@ -190,7 +192,7 @@ def render_post_card(forum_tools, post: Dict[str, Any], user_id: str, user_langu
         with col4:
             # Mark as solution button
             if not post.get('is_solution', False):
-                if st.button("✓ Solution", key=f"solution_{post['post_id']}"):
+                if st.button("✓ Solution", key=f"solution_{k}"):
                     solution_result = forum_tools.mark_post_as_solution(post['post_id'], user_id)
                     if solution_result['success']:
                         st.success("Marked as solution!")
@@ -205,12 +207,12 @@ def render_post_card(forum_tools, post: Dict[str, Any], user_id: str, user_langu
             st.caption(f"🕒 {time_ago}")
         
         with col6:
-            if st.button("💬 Reply", key=f"reply_{post['post_id']}"):
+            if st.button("💬 Reply", key=f"reply_{k}"):
                 st.session_state[f'replying_to_{post["post_id"]}'] = True
         
         # Reply form
         if st.session_state.get(f'replying_to_{post["post_id"]}', False):
-            with st.form(key=f"reply_form_{post['post_id']}"):
+            with st.form(key=f"reply_form_{k}"):
                 reply_content = st.text_area(
                     "Your Reply",
                     placeholder="Share your thoughts...",
@@ -365,8 +367,8 @@ def render_search_posts(forum_tools, user_id: str, user_language: str, translati
             st.markdown(f"### Found {result['count']} results for '{search_query}'")
             
             if result['posts']:
-                for post in result['posts']:
-                    render_post_card(forum_tools, post, user_id, user_language, translation_enabled)
+                for i, post in enumerate(result['posts']):
+                    render_post_card(forum_tools, post, user_id, user_language, translation_enabled, key_prefix=f"search_{i}")
             else:
                 st.info("📭 No posts found matching your search.")
         else:

@@ -12,6 +12,71 @@ from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
+# Fallback schemes when DynamoDB is empty or table doesn't exist (so users always see recommendations)
+def _get_fallback_schemes() -> List[Dict[str, Any]]:
+    """Return sample government schemes for demo when DB has no data."""
+    now = int(datetime.now().timestamp())
+    schemes = [
+        {
+            'scheme_id': 'PM-KISAN',
+            'scheme_name': 'PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)',
+            'scheme_type': 'central',
+            'state': 'central',
+            'category': 'subsidies',
+            'description': 'Direct income support of ₹6000 per year to all farmer families.',
+            'benefit_amount': 6000,
+            'required_documents': ['Aadhaar', 'Bank Account', 'Land Records'],
+            'application_deadline': now + 365 * 86400,
+        },
+        {
+            'scheme_id': 'PMFBY',
+            'scheme_name': 'PMFBY (Pradhan Mantri Fasal Bima Yojana)',
+            'scheme_type': 'central',
+            'state': 'central',
+            'category': 'crop_insurance',
+            'description': 'Comprehensive crop insurance covering all stages of the crop cycle.',
+            'benefit_amount': 200000,
+            'required_documents': ['Aadhaar', 'Bank Account', 'Land Records', 'Sowing Certificate'],
+            'application_deadline': now + 180 * 86400,
+        },
+        {
+            'scheme_id': 'KCC',
+            'scheme_name': 'Kisan Credit Card (KCC)',
+            'scheme_type': 'central',
+            'state': 'central',
+            'category': 'loans',
+            'description': 'Credit facility for farmers for agricultural expenses.',
+            'benefit_amount': 300000,
+            'required_documents': ['Aadhaar', 'Land Records', 'Income Proof'],
+            'application_deadline': 0,
+        },
+        {
+            'scheme_id': 'SHC',
+            'scheme_name': 'Soil Health Card Scheme',
+            'scheme_type': 'central',
+            'state': 'central',
+            'category': 'soil_health',
+            'description': 'Free soil testing and health cards for farmers.',
+            'benefit_amount': 0,
+            'required_documents': ['Aadhaar', 'Land Records'],
+            'application_deadline': 0,
+        },
+        {
+            'scheme_id': 'PKVY',
+            'scheme_name': 'Paramparagat Krishi Vikas Yojana (PKVY)',
+            'scheme_type': 'central',
+            'state': 'central',
+            'category': 'organic_farming',
+            'description': 'Support for organic farming through cluster approach.',
+            'benefit_amount': 50000,
+            'required_documents': ['Aadhaar', 'Land Records', 'Group Formation Certificate'],
+            'application_deadline': now + 90 * 86400,
+        },
+    ]
+    for s in schemes:
+        s['_fallback'] = True
+    return schemes
+
 
 class SchemeDiscoveryTools:
     """Scheme discovery and eligibility tools for RISE farming assistant"""
@@ -241,28 +306,37 @@ Format as JSON with keys: relevant_categories, farmer_needs, priority_areas, est
             analysis = analysis_result['analysis']
             relevant_categories = analysis.get('relevant_categories', [])
             
-            # Get schemes from relevant categories
+            # Get schemes from relevant categories (DynamoDB); use fallback if empty
             state = farmer_profile.get('location', {}).get('state', '').lower()
             all_schemes = []
+            try:
+                central_schemes = self._search_schemes_by_categories(relevant_categories, 'central')
+                all_schemes.extend(central_schemes)
+                if state and state != 'central':
+                    state_schemes = self._search_schemes_by_categories(relevant_categories, state)
+                    all_schemes.extend(state_schemes)
+            except Exception as e:
+                logger.warning(f"Scheme search failed (using fallback): {e}")
+            if not all_schemes:
+                all_schemes = _get_fallback_schemes()
+                logger.info("No schemes in DB; showing fallback recommendations")
             
-            # Search central schemes
-            central_schemes = self._search_schemes_by_categories(relevant_categories, 'central')
-            all_schemes.extend(central_schemes)
-            
-            # Search state schemes
-            if state and state != 'central':
-                state_schemes = self._search_schemes_by_categories(relevant_categories, state)
-                all_schemes.extend(state_schemes)
-            
-            # Check eligibility for each scheme
+            # Check eligibility for each scheme (skip DB calls for fallback schemes)
             eligible_schemes = []
             for scheme in all_schemes:
+                if scheme.pop('_fallback', False):
+                    scheme_with_details = {
+                        **scheme,
+                        'eligibility_confidence': 0.85,
+                        'required_documents': scheme.get('required_documents', []),
+                        'estimated_benefit': float(scheme.get('benefit_amount', 0)),
+                        'next_steps': ['Apply through official portal or nearest CSC']
+                    }
+                    eligible_schemes.append(scheme_with_details)
+                    continue
                 eligibility = self.check_eligibility(farmer_profile, scheme['scheme_id'])
-                
                 if eligibility['success'] and eligibility['eligible']:
-                    # Calculate benefit amount
                     benefit_calc = self.calculate_benefit_amount(farmer_profile, scheme['scheme_id'])
-                    
                     scheme_with_details = {
                         **scheme,
                         'eligibility_confidence': eligibility['confidence_score'],

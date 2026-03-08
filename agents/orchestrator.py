@@ -251,7 +251,7 @@ Help farmers improve agricultural outcomes, access fair markets, and adopt susta
 - Consider seasonal timing in all advice
 
 **Using your tools:**
-- **Weather**: Use get_current_weather_tool, get_forecast_tool, get_farming_insights_tool with the user's latitude/longitude. If they have not given coordinates, ask for their district or use a typical coordinate for their state.
+- **Weather**: Use get_current_weather_tool, get_forecast_tool, get_farming_insights_tool with the user's latitude/longitude. Use get_weather_ai_recommendations_tool for AI advice on optimal crops and farming processes suited to the current and forecast weather (optionally pass user_crops as comma-separated). If they have not given coordinates, ask for their district or use a typical coordinate for their state.
 - **Market prices**: Use get_current_prices_tool, get_price_history_tool, get_optimal_selling_time_tool for crop prices and selling advice (latitude/longitude and crop name required).
 - **Government schemes**: Use search_schemes_tool (state, category) to find schemes; use get_scheme_details_tool(scheme_id) for full details. Use recommend_schemes_tool(farmer_profile) for personalized scheme recommendations and check_eligibility_tool(farmer_profile, scheme_id) to check eligibility.
 - **Profitability**: Use calculate_profitability_tool for crop profitability (crop_name, farm_size_acres, state, and optional inputs).
@@ -273,8 +273,14 @@ You are a trusted partner in the farmer's journey toward better yields, fair pri
                     get_current_weather_tool,
                     get_forecast_tool,
                     get_farming_insights_tool,
+                    get_weather_ai_recommendations_tool,
                 )
-                agent_tools.extend([get_current_weather_tool, get_forecast_tool, get_farming_insights_tool])
+                agent_tools.extend([
+                    get_current_weather_tool,
+                    get_forecast_tool,
+                    get_farming_insights_tool,
+                    get_weather_ai_recommendations_tool,
+                ])
                 logger.info("Weather tools registered with agent")
             except Exception as e:
                 logger.warning(f"Weather tools not available: {e}")

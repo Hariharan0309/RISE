@@ -1,16 +1,31 @@
 {
   "version": "50.0.0",
   "files": {
-    "dc1c90d67becfa4083369702913709c746456b7450ca6829bb189dc72c0a76aa": {
+    "7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200": {
+      "displayName": "RiseStack/Custom::VpcRestrictDefaultSGCustomResourceProvider Code",
+      "source": {
+        "path": "asset.7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "current_account-us-east-1-b3ca7882": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
+          "objectKey": "7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200.zip",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
+        }
+      }
+    },
+    "34096b5f62211d6756e99cc06907d9ecd31c057f409819dde50de499092ed9ad": {
       "displayName": "RiseStack Template",
       "source": {
         "path": "RiseStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "current_account-us-east-1-2cf30e17": {
+        "current_account-us-east-1-6e37a666": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
-          "objectKey": "dc1c90d67becfa4083369702913709c746456b7450ca6829bb189dc72c0a76aa.json",
+          "objectKey": "34096b5f62211d6756e99cc06907d9ecd31c057f409819dde50de499092ed9ad.json",
           "region": "us-east-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
         }

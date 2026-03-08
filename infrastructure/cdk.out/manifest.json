@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/dc1c90d67becfa4083369702913709c746456b7450ca6829bb189dc72c0a76aa.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/34096b5f62211d6756e99cc06907d9ecd31c057f409819dde50de499092ed9ad.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -34,6 +34,168 @@
         "RiseStack.assets"
       ],
       "metadata": {
+        "/RiseStack/RiseVPC/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPC6BEBDBC5"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet1Subnet6F9360CE"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet1RouteTableDD14BE3E"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet1RouteTableAssociation9D81E1CA"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet1DefaultRoute3603D2FE"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet1/EIP": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet1EIPDEEB6A24"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet1/NATGateway": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet1NATGatewayE4D33BA7"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet2SubnetFAB26F43"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet2RouteTableFD070354"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet2RouteTableAssociation9A74F8BC"
+          }
+        ],
+        "/RiseStack/RiseVPC/PublicSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPublicSubnet2DefaultRouteE9AB02A1"
+          }
+        ],
+        "/RiseStack/RiseVPC/PrivateSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPrivateSubnet1SubnetD6B1E1F4"
+          }
+        ],
+        "/RiseStack/RiseVPC/PrivateSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPrivateSubnet1RouteTable9B1F7799"
+          }
+        ],
+        "/RiseStack/RiseVPC/PrivateSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPrivateSubnet1RouteTableAssociation9F17124C"
+          }
+        ],
+        "/RiseStack/RiseVPC/PrivateSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPrivateSubnet1DefaultRouteEE9ECA4D"
+          }
+        ],
+        "/RiseStack/RiseVPC/PrivateSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPrivateSubnet2Subnet76B0E70F"
+          }
+        ],
+        "/RiseStack/RiseVPC/PrivateSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPrivateSubnet2RouteTable2840EE13"
+          }
+        ],
+        "/RiseStack/RiseVPC/PrivateSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPrivateSubnet2RouteTableAssociationC0566DBB"
+          }
+        ],
+        "/RiseStack/RiseVPC/PrivateSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCPrivateSubnet2DefaultRouteF679F532"
+          }
+        ],
+        "/RiseStack/RiseVPC/IGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCIGW189C8201"
+          }
+        ],
+        "/RiseStack/RiseVPC/VPCGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCVPCGW6E4BF5D5"
+          }
+        ],
+        "/RiseStack/RiseVPC/RestrictDefaultSecurityGroupCustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RiseVPCRestrictDefaultSecurityGroupCustomResource637A4F6C"
+          }
+        ],
+        "/RiseStack/Custom::VpcRestrictDefaultSGCustomResourceProvider": [
+          {
+            "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+            "data": true
+          }
+        ],
+        "/RiseStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+          }
+        ],
+        "/RiseStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E"
+          }
+        ],
+        "/RiseStack/RedisSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisSecurityGroupB05951F6"
+          }
+        ],
+        "/RiseStack/DaxSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DaxSecurityGroupC27BF149"
+          }
+        ],
         "/RiseStack/UserProfilesTable": [
           {
             "type": "aws:cdk:hasPhysicalName",
@@ -102,6 +264,20 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "BuyingGroupsTableC7A2BCD0"
+          }
+        ],
+        "/RiseStack/ForumPostsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "ForumPostsTableECD598B5"
+            }
+          }
+        ],
+        "/RiseStack/ForumPostsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ForumPostsTableECD598B5"
           }
         ],
         "/RiseStack/ResourceBookingsTable": [
@@ -202,6 +378,100 @@
             "data": "GovernmentSchemesTable59D45A93"
           }
         ],
+        "/RiseStack/SuppliersTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "SuppliersTableF9BC2E6D"
+            }
+          }
+        ],
+        "/RiseStack/SuppliersTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SuppliersTableF9BC2E6D"
+          }
+        ],
+        "/RiseStack/NegotiationsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "NegotiationsTableE4A1294E"
+            }
+          }
+        ],
+        "/RiseStack/NegotiationsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NegotiationsTableE4A1294E"
+          }
+        ],
+        "/RiseStack/SupplierQuotesTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "SupplierQuotesTable9CAC773B"
+            }
+          }
+        ],
+        "/RiseStack/SupplierQuotesTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SupplierQuotesTable9CAC773B"
+          }
+        ],
+        "/RiseStack/BestPracticesTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "BestPracticesTableA2F1ED13"
+            }
+          }
+        ],
+        "/RiseStack/BestPracticesTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BestPracticesTableA2F1ED13"
+          }
+        ],
+        "/RiseStack/PracticeAdoptionsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "PracticeAdoptionsTable0194FDDA"
+            }
+          }
+        ],
+        "/RiseStack/PracticeAdoptionsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PracticeAdoptionsTable0194FDDA"
+          }
+        ],
+        "/RiseStack/DaxServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DaxServiceRole2D2D58ED"
+          }
+        ],
+        "/RiseStack/DaxServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DaxServiceRoleDefaultPolicyF1BE0C7D"
+          }
+        ],
+        "/RiseStack/DaxSubnetGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DaxSubnetGroup"
+          }
+        ],
+        "/RiseStack/DaxCluster": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DaxCluster"
+          }
+        ],
         "/RiseStack/AppDataBucket/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -212,6 +482,18 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "AppDataBucketPolicyE31553DB"
+          }
+        ],
+        "/RiseStack/RedisSubnetGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisSubnetGroup"
+          }
+        ],
+        "/RiseStack/RedisCluster": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisCluster"
           }
         ],
         "/RiseStack/RiseOAI/Resource": [
@@ -230,6 +512,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "ImagesCachePolicy8E44AD34"
+          }
+        ],
+        "/RiseStack/DocumentsCachePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DocumentsCachePolicyA0359792"
           }
         ],
         "/RiseStack/RiseDistribution/LoggingBucket/Resource": [
@@ -265,7 +553,7 @@
         "/RiseStack/RiseRestApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "RiseRestApiDeploymentBD243178c88d6bfe3ea472da0177413cac3064ea"
+            "data": "RiseRestApiDeploymentBD2431787adec04b91b4a80f7a91c39e31bc18dc"
           }
         ],
         "/RiseStack/RiseRestApi/DeploymentStage.v1/Resource": [
@@ -860,6 +1148,48 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "BedrockExecutionRoleDefaultPolicy1A669643"
+          }
+        ],
+        "/RiseStack/CloudFrontDistributionURL": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CloudFrontDistributionURL"
+          }
+        ],
+        "/RiseStack/ApiGatewayEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiGatewayEndpoint"
+          }
+        ],
+        "/RiseStack/RedisClusterEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisClusterEndpoint"
+          }
+        ],
+        "/RiseStack/RedisClusterPort": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RedisClusterPort"
+          }
+        ],
+        "/RiseStack/DaxClusterEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DaxClusterEndpoint"
+          }
+        ],
+        "/RiseStack/S3BucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "S3BucketName"
+          }
+        ],
+        "/RiseStack/VpcId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VpcId"
           }
         ],
         "/RiseStack/CDKMetadata/Default": [

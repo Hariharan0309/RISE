@@ -78,6 +78,8 @@ def render_loan_calculator():
                     purpose=purpose
                 )
                 if result['success']:
+                    if 'loan_ai_summary' in st.session_state:
+                        del st.session_state['loan_ai_summary']  # clear so new assessment gets fresh summary
                     st.success("✅ Financing needs assessed successfully!")
                     col1, col2, col3 = st.columns(3)
                     with col1:
@@ -113,6 +115,26 @@ def render_loan_calculator():
                         st.write("**Alternatives:**")
                         for alt in rec['alternatives']:
                             st.write(f"- {alt}")
+                    # AI summary and tips (store in session state so it persists after rerun)
+                    with st.expander("🤖 AI Summary & Tips"):
+                        if st.button("Get AI summary", key="loan_ai_btn"):
+                            with st.spinner("Generating AI summary..."):
+                                from tools.ai_insights import get_ai_insight
+                                el = result.get('eligibility', {})
+                                cap = result.get('repayment_capacity', {})
+                                prompt = f"""You are a loan advisor for Indian farmers. In 2-3 short paragraphs, explain in simple language:
+
+Farmer: {farmer_name}, age {farmer_age}. Income ₹{annual_farm_income}, expenses ₹{annual_expenses}. Credit score {credit_score}. Loan purpose: {purpose}. Required amount: ₹{result.get('required_amount', 0):,.0f}. Eligible: {el.get('eligible', False)}. Repayment capacity: {cap.get('capacity_level', '')}. Recommendation: {rec.get('message', '')}.
+
+Provide: (1) Plain-language summary of what this means. (2) Concrete next steps. (3) One or two tips to improve eligibility or get better terms if relevant. Be supportive and clear."""
+                                ai = get_ai_insight(prompt)
+                            st.session_state['loan_ai_summary'] = ai
+                        if 'loan_ai_summary' in st.session_state:
+                            ai = st.session_state['loan_ai_summary']
+                            if ai.get('success'):
+                                st.markdown(ai.get('text', ''))
+                            else:
+                                st.error(ai.get('error', 'Failed to generate summary'))
                 else:
                     st.error(f"Error: {result.get('error', 'Unknown error')}")
 

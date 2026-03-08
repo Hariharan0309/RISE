@@ -56,6 +56,24 @@ def render_equipment_search(equipment_tools):
     st.header("Search Available Equipment")
     st.markdown("Find equipment within 25km radius")
     
+    # AI: suggest equipment for my farm
+    with st.expander("🤖 Suggest equipment for my farm (AI)"):
+        farm_crops = st.text_input("Crops you grow (comma-separated)", value="wheat, rice", key="eq_crops")
+        farm_acres = st.number_input("Farm size (acres)", min_value=0.5, value=5.0, step=0.5, key="eq_acres")
+        if st.button("Get AI suggestion", key="eq_ai_btn"):
+            with st.spinner("Getting AI suggestion..."):
+                from tools.ai_insights import get_ai_insight
+                prompt = f"""You are an agricultural equipment advisor for Indian farmers. In 2 short paragraphs, suggest which types of equipment would be most useful for this farm and why.
+
+Farm: {farm_acres} acres. Crops: {farm_crops}.
+
+Suggest 3-5 equipment types (e.g. tractor, pump, harvester, sprayer, drone) and briefly say what each helps with. Keep it practical and simple."""
+                ai = get_ai_insight(prompt)
+            if ai.get('success'):
+                st.markdown(ai.get('text', ''))
+            else:
+                st.error(ai.get('error', 'Failed to get suggestion'))
+    
     col1, col2 = st.columns(2)
     
     with col1:

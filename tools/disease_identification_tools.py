@@ -13,6 +13,11 @@ from datetime import datetime
 from PIL import Image
 import io
 
+try:
+    from botocore.exceptions import ClientError
+except ImportError:
+    ClientError = Exception
+
 logger = logging.getLogger(__name__)
 
 
@@ -48,51 +53,48 @@ class DiseaseIdentificationTools:
         
         logger.info(f"Disease identification tools initialized in region {region} with model {self.model_id}")
     
-    def compress_image(self, image_data: bytes, max_size_kb: int = 500) -> bytes:
+    def compress_image(self, image_data: bytes, max_size_kb: int = 500, max_dimension: int = 2048) -> bytes:
         """
-        Compress image to reduce size while maintaining quality
+        Compress and optionally resize image to stay within Bedrock payload limits.
         
         Args:
             image_data: Original image bytes
             max_size_kb: Maximum size in KB
+            max_dimension: Max width/height in pixels (reduces payload for Bedrock)
         
         Returns:
-            Compressed image bytes
+            Compressed image bytes (JPEG)
         """
         try:
-            # Open image
             img = Image.open(io.BytesIO(image_data))
-            
-            # Convert to RGB if necessary
             if img.mode in ('RGBA', 'LA', 'P'):
                 img = img.convert('RGB')
             
-            # Calculate compression quality
+            # Resize if too large to avoid Bedrock request size limits
+            w, h = img.size
+            if w > max_dimension or h > max_dimension:
+                ratio = min(max_dimension / w, max_dimension / h)
+                new_size = (int(w * ratio), int(h * ratio))
+                img = img.resize(new_size, Image.Resampling.LANCZOS)
+                logger.info(f"Image resized from {w}x{h} to {new_size[0]}x{new_size[1]}")
+            
             quality = 85
             output = io.BytesIO()
-            
-            # Iteratively compress until size is acceptable
             while quality > 20:
                 output.seek(0)
                 output.truncate()
                 img.save(output, format='JPEG', quality=quality, optimize=True)
-                
                 size_kb = len(output.getvalue()) / 1024
-                
                 if size_kb <= max_size_kb:
                     break
-                
                 quality -= 10
             
             compressed_data = output.getvalue()
-            
             logger.info(f"Image compressed from {len(image_data)/1024:.1f}KB to {len(compressed_data)/1024:.1f}KB")
-            
             return compressed_data
-        
         except Exception as e:
             logger.error(f"Image compression error: {e}")
-            return image_data  # Return original if compression fails
+            return image_data
     
     def validate_image_quality(self, image_data: bytes) -> Dict[str, Any]:
         """
@@ -178,8 +180,8 @@ class DiseaseIdentificationTools:
                     'validation': validation
                 }
             
-            # Compress image
-            compressed_image = self.compress_image(image_data)
+            # Compress image (keep under ~300KB for Bedrock request size limits)
+            compressed_image = self.compress_image(image_data, max_size_kb=300, max_dimension=2048)
             
             # Encode image to base64
             image_base64 = base64.b64encode(compressed_image).decode('utf-8')
@@ -268,10 +270,22 @@ class DiseaseIdentificationTools:
                 }
             
             # Call Bedrock with multimodal input
-            response = self.bedrock_runtime.invoke_model(
-                modelId=self.model_id,
-                body=json.dumps(request_body)
-            )
+            try:
+                response = self.bedrock_runtime.invoke_model(
+                    modelId=self.model_id,
+                    body=json.dumps(request_body)
+                )
+            except ClientError as e:
+                code = e.response.get('Error', {}).get('Code', '')
+                msg = e.response.get('Error', {}).get('Message', str(e))
+                if code == 'ValidationException':
+                    logger.warning(f"Bedrock validation error: {msg}")
+                    return {
+                        'success': False,
+                        'error': 'Image or request was rejected. Try a smaller or clearer photo (JPEG/PNG under 5MB).'
+                    }
+                logger.error(f"Bedrock error: {code} - {msg}", exc_info=True)
+                return {'success': False, 'error': f'Analysis service error: {msg}'}
             
             # Parse response based on model type
             response_body = json.loads(response['body'].read())
@@ -293,31 +307,47 @@ class DiseaseIdentificationTools:
             
             # Generate diagnosis ID
             diagnosis_id = f"diag_{uuid.uuid4().hex[:12]}"
-            
-            # Store image in S3
-            s3_key = f"images/crop-photos/{user_id}/{diagnosis_id}.jpg"
-            self.s3_client.put_object(
-                Bucket=self.s3_bucket,
-                Key=s3_key,
-                Body=compressed_image,
-                ContentType='image/jpeg',
-                Metadata={
-                    'user_id': user_id,
-                    'diagnosis_id': diagnosis_id,
-                    'crop_type': crop_type or 'unknown',
-                    'timestamp': str(int(datetime.now().timestamp()))
-                }
-            )
-            
-            # Store diagnosis in DynamoDB
-            self._store_diagnosis(
-                diagnosis_id=diagnosis_id,
-                user_id=user_id,
-                s3_key=s3_key,
-                diagnosis=diagnosis,
-                crop_type=crop_type
-            )
-            
+            s3_key = None
+
+            # Store image in S3 (optional: analysis still works if bucket is missing)
+            try:
+                s3_key = f"images/crop-photos/{user_id}/{diagnosis_id}.jpg"
+                self.s3_client.put_object(
+                    Bucket=self.s3_bucket,
+                    Key=s3_key,
+                    Body=compressed_image,
+                    ContentType='image/jpeg',
+                    Metadata={
+                        'user_id': user_id,
+                        'diagnosis_id': diagnosis_id,
+                        'crop_type': crop_type or 'unknown',
+                        'timestamp': str(int(datetime.now().timestamp()))
+                    }
+                )
+            except ClientError as e:
+                code = e.response.get('Error', {}).get('Code', '')
+                if code == 'NoSuchBucket':
+                    logger.warning(
+                        "S3 bucket %s does not exist; diagnosis will not store image. "
+                        "Create the bucket or set S3_BUCKET_NAME.",
+                        self.s3_bucket,
+                    )
+                else:
+                    logger.warning("S3 upload failed: %s. Diagnosis will still be returned.", e)
+                s3_key = None
+
+            # Store diagnosis in DynamoDB (optional: skip if table missing or S3 failed)
+            try:
+                self._store_diagnosis(
+                    diagnosis_id=diagnosis_id,
+                    user_id=user_id,
+                    s3_key=s3_key or "",
+                    diagnosis=diagnosis,
+                    crop_type=crop_type
+                )
+            except ClientError as e:
+                logger.warning("DynamoDB store failed: %s. Diagnosis will still be returned.", e)
+
             return {
                 'success': True,
                 'diagnosis_id': diagnosis_id,
@@ -487,7 +517,7 @@ If the image quality is poor or the crop is not clearly visible, indicate what s
                         s3_key: str,
                         diagnosis: Dict[str, Any],
                         crop_type: Optional[str]) -> None:
-        """Store diagnosis in DynamoDB"""
+        """Store diagnosis in DynamoDB. s3_key may be empty if S3 upload was skipped."""
         try:
             from decimal import Decimal
             

@@ -47,6 +47,7 @@ class WeatherTools:
         """
         self.region = region
         self.dynamodb = boto3.resource('dynamodb', region_name=region)
+        self.bedrock = boto3.client('bedrock-runtime', region_name=region)
         
         # DynamoDB table for weather forecast storage
         self.weather_table = self.dynamodb.Table('RISE-WeatherForecast')
@@ -466,6 +467,76 @@ class WeatherTools:
         
         return activities
     
+    def get_ai_weather_recommendations(self,
+                                      latitude: float,
+                                      longitude: float,
+                                      location_name: Optional[str] = None,
+                                      user_crops: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Get AI-powered recommendations: optimal crops and farming processes suited to current
+        and forecast weather for the user's location.
+        """
+        try:
+            # Fetch current weather and forecast
+            current_result = self.get_current_weather(latitude, longitude, location_name)
+            forecast_result = self.get_forecast(latitude, longitude, 5)
+            if not current_result.get('success'):
+                return {'success': False, 'error': current_result.get('error', 'Failed to fetch weather')}
+            if not forecast_result.get('success'):
+                return {'success': False, 'error': forecast_result.get('error', 'Failed to fetch forecast')}
+            
+            current = current_result['current']
+            loc_name = current_result.get('location', {}).get('name', location_name or 'this location')
+            daily = forecast_result.get('daily_summary', [])[:5]
+            weather_summary = (
+                f"Current: {current['temperature']}°C, {current['weather_description']}, "
+                f"Humidity {current['humidity']}%, Wind {current['wind_speed']} m/s, Rain (1h) {current['rain_1h']}mm. "
+                f"Next 5 days: " + "; ".join(
+                    f"{d['date']} {d['temp_min']}-{d['temp_max']}°C, {d['rain_total']}mm rain"
+                    for d in daily
+                )
+            )
+            crops_context = ""
+            if user_crops:
+                crops_context = f" The farmer currently grows or is interested in: {', '.join(user_crops)}."
+            
+            from config import Config
+            prompt = f"""You are an agricultural advisor for Indian farmers. Based on the following weather data for {loc_name}, provide brief, actionable advice in plain language (2-4 short paragraphs).
+
+Weather data:
+{weather_summary}
+{crops_context}
+
+Provide:
+1. **Optimal crops** – Which crops or varieties are best suited to plant or focus on in the current and upcoming weather (consider season and region).
+2. **Optimal farming processes** – What to do now: e.g. irrigation, spraying, planting, harvesting, pest management, or what to avoid.
+3. **Short-term tips** – Any specific actions for the next 3-5 days.
+
+Keep the tone helpful and practical. Write in clear English. Do not use bullet points if you prefer flowing paragraphs."""
+
+            body = {
+                'anthropic_version': 'bedrock-2023-05-31',
+                'max_tokens': 800,
+                'messages': [{'role': 'user', 'content': prompt}],
+                'temperature': 0.3,
+            }
+            response = self.bedrock.invoke_model(
+                modelId=Config.BEDROCK_MODEL_ID,
+                body=json.dumps(body),
+            )
+            response_body = json.loads(response['body'].read())
+            analysis_text = response_body['content'][0]['text'].strip()
+            
+            return {
+                'success': True,
+                'location': {'name': loc_name, 'latitude': latitude, 'longitude': longitude},
+                'analysis': analysis_text,
+                'weather_summary': weather_summary,
+            }
+        except Exception as e:
+            logger.error(f"AI weather recommendations error: {e}", exc_info=True)
+            return {'success': False, 'error': str(e)}
+    
     def _get_cache_key(self, latitude: float, longitude: float, data_type: str) -> str:
         """Generate cache key for weather data"""
         # Round coordinates to 2 decimal places for cache efficiency
@@ -619,3 +690,18 @@ def get_farming_insights_tool(latitude: float, longitude: float) -> str:
         return insights
     else:
         return f"Error: {result.get('error', 'Failed to fetch insights')}"
+
+
+@tool
+def get_weather_ai_recommendations_tool(latitude: float, longitude: float,
+                                        location_name: Optional[str] = None,
+                                        user_crops: Optional[str] = None) -> str:
+    """
+    Get AI recommendations for optimal crops and farming processes based on current and forecast weather at this location. Use when the user asks what to grow, what to do now, or best crops/activities for the weather. user_crops: optional comma-separated list of crops they grow or are interested in.
+    """
+    tools = create_weather_tools()
+    crops_list = [c.strip() for c in (user_crops or "").split(",") if c.strip()] or None
+    result = tools.get_ai_weather_recommendations(latitude, longitude, location_name, crops_list)
+    if result.get('success'):
+        return result.get('analysis', '') or "No analysis generated."
+    return f"Error: {result.get('error', 'Failed to get AI recommendations')}"

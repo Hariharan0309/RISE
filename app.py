@@ -191,6 +191,30 @@ def apply_custom_css():
     </style>
     """, unsafe_allow_html=True)
 
+
+def inject_chunk_error_recovery():
+    """On deploy, browsers may request old JS chunks (404). Reload once to load fresh chunks."""
+    script = """
+    <script>
+    (function() {
+        var key = 'rise_chunk_reload';
+        window.addEventListener('unhandledrejection', function(e) {
+            var msg = (e.reason && (e.reason.message || e.reason + '')) || '';
+            if (msg.indexOf('Failed to fetch dynamically imported module') !== -1 ||
+                msg.indexOf('Loading chunk') !== -1 || msg.indexOf('ChunkLoadError') !== -1) {
+                e.preventDefault();
+                if (!sessionStorage.getItem(key)) {
+                    sessionStorage.setItem(key, '1');
+                    window.location.reload();
+                }
+            }
+        });
+    })();
+    </script>
+    """
+    st.components.v1.html(script, height=0)
+
+
 def initialize_session_state():
     """Initialize Streamlit session state variables"""
     if "authenticated" not in st.session_state:
@@ -227,91 +251,120 @@ def initialize_session_state():
             st.session_state.orchestrator = None
             st.session_state.orchestrator_error = str(e)
 
+def _set_session_from_user(user: dict):
+    """Set session state from a user dict (after login or register)."""
+    phone = user["phone"]
+    st.session_state.authenticated = True
+    st.session_state.user_name = user["name"]
+    st.session_state.phone_number = phone
+    st.session_state.user_id = f"farmer_{phone}"
+    st.session_state.location = user.get("location", "Not specified")
+    st.session_state.crops = user.get("crops", [])
+    if st.session_state.orchestrator:
+        try:
+            session_id = st.session_state.orchestrator.create_session(
+                user_id=st.session_state.user_id,
+                language=st.session_state.language,
+                metadata={
+                    "name": user["name"],
+                    "phone": phone,
+                    "location": st.session_state.location,
+                    "crops": st.session_state.crops,
+                },
+            )
+            st.session_state.session_id = session_id
+        except Exception:
+            st.session_state.session_id = f"demo_{phone}"
+    else:
+        st.session_state.session_id = f"demo_{phone}"
+
+
 def render_authentication():
-    """Render simple authentication interface"""
+    """Render login and register interface. First-time users register; returning users log in."""
     st.markdown('<div class="main-header">', unsafe_allow_html=True)
     st.markdown("# 🌾 RISE - Rural Innovation and Sustainable Ecosystem")
     st.markdown("### AI-Powered Farming Assistant for Rural India")
     st.markdown('</div>', unsafe_allow_html=True)
-    
     st.markdown("---")
-    
+
     col1, col2, col3 = st.columns([1, 2, 1])
-    
     with col2:
         st.markdown('<div class="welcome-card">', unsafe_allow_html=True)
-        st.markdown("## Welcome! स्वागत है! வரவேற்கிறோம்!")
-        st.markdown("### Please enter your details to continue")
-        
-        with st.form("auth_form"):
-            name = st.text_input(
-                "Name / नाम / பெயர்",
-                placeholder="Enter your name",
-                help="Your name for personalized assistance"
-            )
-            
-            phone = st.text_input(
-                "Phone Number / फ़ोन नंबर / தொலைபேசி எண்",
-                placeholder="10-digit mobile number",
-                max_chars=10,
-                help="Your mobile number (demo mode - any 10 digits)"
-            )
-            
-            location = st.text_input(
-                "Location / स्थान / இடம்",
-                placeholder="Village, District, State",
-                help="Your farming location"
-            )
-            
-            crops_input = st.text_input(
-                "Crops / फसलें / பயிர்கள்",
-                placeholder="e.g., wheat, rice, cotton",
-                help="Crops you grow (comma-separated)"
-            )
-            
-            submit = st.form_submit_button("Start Farming Assistant / शुरू करें", use_container_width=True)
-            
-            if submit:
-                if name and phone and len(phone) == 10 and phone.isdigit():
-                    # Store user info
-                    st.session_state.authenticated = True
-                    st.session_state.user_name = name
-                    st.session_state.phone_number = phone
-                    st.session_state.user_id = f"farmer_{phone}"
-                    st.session_state.location = location if location else "Not specified"
-                    st.session_state.crops = [c.strip() for c in crops_input.split(",")] if crops_input else []
-                    
-                    # Create session with orchestrator
-                    if st.session_state.orchestrator:
-                        try:
-                            session_id = st.session_state.orchestrator.create_session(
-                                user_id=st.session_state.user_id,
-                                language=st.session_state.language,
-                                metadata={
-                                    "name": name,
-                                    "phone": phone,
-                                    "location": st.session_state.location,
-                                    "crops": st.session_state.crops
-                                }
-                            )
-                            st.session_state.session_id = session_id
-                            st.success("✅ Session created successfully!")
+        auth_mode = st.radio(
+            "**Choose**",
+            ["🔐 Login", "📝 Register (first time)"],
+            horizontal=True,
+            key="auth_mode",
+        )
+        is_login = auth_mode.startswith("🔐")
+
+        if is_login:
+            st.markdown("### Login with your phone number")
+            with st.form("login_form"):
+                login_phone = st.text_input(
+                    "Phone Number",
+                    placeholder="10-digit mobile number",
+                    max_chars=10,
+                    key="login_phone",
+                )
+                login_btn = st.form_submit_button("Login", type="primary")
+                if login_btn:
+                    try:
+                        from auth.user_store import login as user_login
+                        user = user_login(login_phone)
+                        if user:
+                            _set_session_from_user(user)
+                            st.success("✅ Welcome back!")
                             st.rerun()
+                        else:
+                            st.error("No account found with this phone number. Please **Register** first.")
+                    except Exception as e:
+                        st.error(f"Login failed: {e}")
+        else:
+            st.markdown("### Register (one-time) – enter your details")
+            with st.form("register_form"):
+                name = st.text_input("Name / नाम", placeholder="Your name", key="reg_name")
+                phone = st.text_input(
+                    "Phone Number / फ़ोन नंबर",
+                    placeholder="10-digit mobile number",
+                    max_chars=10,
+                    key="reg_phone",
+                )
+                location = st.text_input(
+                    "Location / स्थान",
+                    placeholder="Village, District, State",
+                    key="reg_location",
+                )
+                crops_input = st.text_input(
+                    "Crops / फसलें",
+                    placeholder="e.g., wheat, rice, cotton",
+                    key="reg_crops",
+                )
+                submit = st.form_submit_button("Register & Start", type="primary")
+                if submit:
+                    if name and phone and len(phone) == 10 and phone.isdigit():
+                        try:
+                            from auth.user_store import register
+                            result = register(
+                                phone=phone,
+                                name=name,
+                                location=location or "",
+                                crops=[c.strip() for c in (crops_input or "").split(",") if c.strip()],
+                            )
+                            if result.get("success") and result.get("user"):
+                                _set_session_from_user(result["user"])
+                                st.success("✅ Account created! Welcome to RISE.")
+                                st.rerun()
+                            else:
+                                st.error(result.get("error", "Registration failed"))
                         except Exception as e:
-                            st.error(f"Error creating session: {e}")
+                            st.error(f"Registration failed: {e}")
                     else:
-                        st.warning("⚠️ Orchestrator not available. Running in limited mode.")
-                        st.session_state.session_id = f"demo_{phone}"
-                        st.rerun()
-                else:
-                    st.error("Please enter valid name and 10-digit phone number")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # System status
+                        st.error("Please enter valid name and 10-digit phone number")
+
+        st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("---")
         st.markdown("### System Status")
-        
         health = get_orchestrator_health()
         if health.get("status") == "healthy":
             st.success("✅ All systems operational")
@@ -319,33 +372,10 @@ def render_authentication():
             st.warning("⚠️ Some systems may be unavailable")
 
 def render_sidebar():
-    """Render sidebar with user profile and settings"""
+    """Render sidebar: features at top, user profile at bottom."""
     with st.sidebar:
-        st.markdown("### 👤 User Profile")
-        
-        # User info
-        st.markdown(f"**Name:** {st.session_state.user_name}")
-        st.markdown(f"**Phone:** {st.session_state.phone_number}")
-        st.markdown(f"**Location:** {st.session_state.location}")
-        
-        if st.session_state.crops:
-            st.markdown(f"**Crops:** {', '.join(st.session_state.crops)}")
-        
-        st.divider()
-        
-        # Offline indicator and features
-        from ui.offline_indicator import render_offline_features_info, render_storage_stats
-        render_offline_features_info(st.session_state.language)
-        
-        st.divider()
-        
-        # Storage stats
-        render_storage_stats()
-        
-        st.divider()
-        
-        # Feature / page navigation
-        st.markdown("### 📍 Go to")
+        # Feature / page navigation – at TOP so all features are visible first
+        st.markdown("### 📍 All features")
         page_options = [
             "💬 Chat & Diagnosis",
             "👥 Farmer Forum",
@@ -365,15 +395,14 @@ def render_sidebar():
             "🌤️ Weather Alerts",
             "🎤 Voice Input",
         ]
-        default_idx = 0
-        if "current_page" not in st.session_state:
+        if "current_page" not in st.session_state or st.session_state.current_page not in page_options:
             st.session_state.current_page = page_options[0]
-        current_idx = page_options.index(st.session_state.current_page) if st.session_state.current_page in page_options else 0
-        selected_page = st.selectbox(
-            "Feature",
+        selected_page = st.radio(
+            "Choose a feature",
             page_options,
-            index=current_idx,
-            key="page_selector"
+            index=page_options.index(st.session_state.current_page),
+            key="page_selector",
+            label_visibility="collapsed",
         )
         if selected_page != st.session_state.current_page:
             st.session_state.current_page = selected_page
@@ -381,24 +410,26 @@ def render_sidebar():
         
         st.divider()
         
+        # Offline indicator and storage (compact)
+        from ui.offline_indicator import render_offline_features_info, render_storage_stats
+        render_offline_features_info(st.session_state.language)
+        render_storage_stats()
+        
+        st.divider()
+        
         # Language selector
         st.markdown("### 🌐 Language / भाषा")
-        
-        # Find current language display name
         current_lang_display = "English"
         for display, code in LANGUAGE_MAP.items():
             if code == st.session_state.language:
                 current_lang_display = display
                 break
-        
         language_display = st.selectbox(
             "Select Language",
             list(LANGUAGE_MAP.keys()),
             index=list(LANGUAGE_MAP.keys()).index(current_lang_display),
             key="language_selector"
         )
-        
-        # Update language if changed
         new_lang_code = LANGUAGE_MAP[language_display]
         if new_lang_code != st.session_state.language:
             st.session_state.language = new_lang_code
@@ -413,23 +444,18 @@ def render_sidebar():
         
         # System status
         st.markdown("### ⚙️ System Status")
-        
         if st.session_state.orchestrator:
             try:
                 status = st.session_state.orchestrator.get_status()
-                
                 if status["orchestrator"]["agent_initialized"]:
                     st.success("✅ AI Agent Active")
                 else:
                     st.error("❌ AI Agent Inactive")
-                
                 if status["orchestrator"]["aws_configured"]:
                     st.success("✅ AWS Connected")
                 else:
                     st.warning("⚠️ AWS Not Connected")
-                
                 st.info(f"📊 Messages: {status['sessions'].get('active_count', 0)}")
-                
             except Exception as e:
                 st.error(f"Status check failed: {e}")
         else:
@@ -439,23 +465,28 @@ def render_sidebar():
         
         # Quick actions
         st.markdown("### 🚀 Quick Actions")
-        
         if st.button("🔄 Clear Chat", use_container_width=True):
             st.session_state.chat_history = []
             st.rerun()
-        
         if st.button("📊 Session Stats", use_container_width=True):
             if st.session_state.orchestrator and st.session_state.session_id:
                 stats = st.session_state.orchestrator.get_session_stats(st.session_state.session_id)
                 if stats:
                     st.json(stats)
         
+        st.divider()
+        
+        # User profile at BOTTOM so features stay visible at top
+        st.markdown("### 👤 User Profile")
+        st.markdown(f"**Name:** {st.session_state.user_name}")
+        st.markdown(f"**Phone:** {st.session_state.phone_number}")
+        st.markdown(f"**Location:** {st.session_state.location}")
+        if st.session_state.crops:
+            st.markdown(f"**Crops:** {', '.join(st.session_state.crops)}")
+        
         if st.button("🚪 Logout", use_container_width=True):
-            # Cleanup session
             if st.session_state.orchestrator and st.session_state.session_id:
                 st.session_state.orchestrator.cleanup_session(st.session_state.session_id)
-            
-            # Reset session state
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
@@ -759,6 +790,7 @@ def main():
     
     # Apply custom CSS
     apply_custom_css()
+    inject_chunk_error_recovery()
     
     # Initialize session state
     initialize_session_state()

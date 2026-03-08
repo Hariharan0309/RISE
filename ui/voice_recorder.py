@@ -346,11 +346,10 @@ def render_voice_recorder(
     </html>
     """
     
-    # Render component
+    # Render component (st.components.v1.html does not support key=)
     component_value = components.html(
         recorder_html,
-        height=300,
-        key=key
+        height=300
     )
     
     # Process returned audio data

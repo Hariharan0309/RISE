@@ -54,12 +54,13 @@ class ImageUploader:
     def _render_file_upload(self) -> Optional[Dict[str, Any]]:
         """Render file upload interface"""
         
-        # File uploader
+        # File uploader (limit 10MB to avoid 400 from server/proxy limits)
         uploaded_file = st.file_uploader(
             "Choose an image of your crop",
             type=['jpg', 'jpeg', 'png'],
-            help="Upload a clear photo of the affected crop or leaves",
-            key="file_uploader"
+            help="Upload a clear photo of the affected crop or leaves (max 10MB). Large images are auto-resized.",
+            key="file_uploader",
+            max_upload_size=10  # MB
         )
         
         if uploaded_file is not None:
@@ -162,11 +163,13 @@ class ImageUploader:
                     self._display_diagnosis(result)
                     return result
                 else:
-                    # Handle errors
+                    # Handle errors (avoids generic 400 / AxiosError by showing backend message)
                     if result.get('error') == 'poor_image_quality':
                         self._display_quality_issues(result.get('validation', {}))
                     else:
-                        st.error(f"Analysis failed: {result.get('error', 'Unknown error')}")
+                        err = result.get('error', 'Unknown error')
+                        st.error(f"Analysis failed: {err}")
+                        st.caption("Try a smaller or clearer JPEG/PNG image if the error persists.")
             
             except Exception as e:
                 st.error(f"Error during analysis: {e}")

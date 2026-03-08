@@ -26,6 +26,7 @@ class ProfitabilityCalculatorTools:
         """
         self.region = region
         self.dynamodb = boto3.resource('dynamodb', region_name=region)
+        self.bedrock = boto3.client('bedrock-runtime', region_name=region)
         
         # DynamoDB table for profitability data
         self.profitability_table = self.dynamodb.Table('RISE-ProfitabilityData')
@@ -142,6 +143,67 @@ class ProfitabilityCalculatorTools:
                 'success': False,
                 'error': str(e)
             }
+
+    def get_ai_profitability_analysis(self,
+                                     profitability_result: Dict[str, Any],
+                                     user_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Get AI-powered analysis of profitability results: plain-language summary,
+        tips to improve profit, risk mitigation, and when to sell.
+        """
+        if not profitability_result.get('success'):
+            return {'success': False, 'error': profitability_result.get('error', 'No profitability data')}
+        try:
+            from config import Config
+            scenarios = profitability_result.get('profitability_scenarios', {})
+            avg = scenarios.get('average', {})
+            risk = profitability_result.get('risk_assessment', {})
+            crop = profitability_result.get('crop_name', 'crop').title()
+            location = profitability_result.get('location', {})
+            state = location.get('state', '') if isinstance(location, dict) else ''
+            summary = (
+                f"Crop: {crop}. Farm: {profitability_result.get('farm_size_acres', 0)} acres. "
+                f"Total investment: ₹{profitability_result.get('cost_breakdown', {}).get('total_farm_cost', 0):,.0f}. "
+                f"Expected revenue (avg): ₹{avg.get('total_revenue', 0):,.0f}. "
+                f"Net profit: ₹{avg.get('net_profit', 0):,.0f}. ROI: {avg.get('roi_percent', 0):.1f}%. "
+                f"Risk level: {risk.get('overall_risk_level', 'medium')}. "
+                f"Risk factors: {[f.get('factor') for f in risk.get('risk_factors', [])]}."
+            )
+            context = (user_context or {}).get('notes', '')
+            prompt = f"""You are an agricultural advisor for Indian farmers. Based on the following profitability analysis, provide a brief, helpful AI analysis (2-4 short paragraphs) in plain language.
+
+{summary}
+Location/state: {state}
+{f'Additional context: {context}' if context else ''}
+
+Provide:
+1. **Summary** – What this result means for the farmer in simple terms.
+2. **Tips to improve profitability** – Practical steps (e.g. reduce input cost, improve yield, better timing).
+3. **Risk mitigation** – How to address the main risks mentioned.
+4. **When to sell** – Brief advice on timing of sale or storage based on typical market patterns.
+
+Keep the tone supportive and practical. Write in clear English."""
+
+            body = {
+                'anthropic_version': 'bedrock-2023-05-31',
+                'max_tokens': 700,
+                'messages': [{'role': 'user', 'content': prompt}],
+                'temperature': 0.3,
+            }
+            response = self.bedrock.invoke_model(
+                modelId=Config.BEDROCK_MODEL_ID,
+                body=json.dumps(body),
+            )
+            response_body = json.loads(response['body'].read())
+            analysis_text = response_body['content'][0]['text'].strip()
+            return {
+                'success': True,
+                'analysis': analysis_text,
+                'crop_name': crop,
+            }
+        except Exception as e:
+            logger.error(f"AI profitability analysis error: {e}", exc_info=True)
+            return {'success': False, 'error': str(e)}
 
     def estimate_input_costs(self,
                             crop_name: str,

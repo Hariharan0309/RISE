@@ -124,10 +124,18 @@ class BuyingGroupTools:
                 }
             
             user = user_response['Item']
-            user_location = user.get('location', {})
+            raw_location = user.get('location', {})
+            # Ensure location is a dict (DynamoDB or legacy may store string)
+            if isinstance(raw_location, str):
+                try:
+                    user_location = json.loads(raw_location) if raw_location else {}
+                except (json.JSONDecodeError, TypeError):
+                    user_location = {'state': raw_location, 'district': ''}
+            else:
+                user_location = raw_location if isinstance(raw_location, dict) else {}
             
             # Query groups by location
-            location_key = f"{requirements.get('district', user_location.get('district'))}_{requirements.get('state', user_location.get('state'))}"
+            location_key = f"{requirements.get('district') or user_location.get('district', '')}_{requirements.get('state') or user_location.get('state', '')}"
             
             response = self.groups_table.scan(
                 FilterExpression='group_status IN (:forming, :active)',
@@ -143,15 +151,24 @@ class BuyingGroupTools:
             required_products = set(requirements.get('products', []))
             
             for group in groups:
+                # Normalize group location to dict (may be stored as string)
+                raw_group_loc = group.get('location', {})
+                if isinstance(raw_group_loc, str):
+                    try:
+                        group_location = json.loads(raw_group_loc) if raw_group_loc else {}
+                    except (json.JSONDecodeError, TypeError):
+                        group_location = {'state': raw_group_loc, 'district': ''}
+                else:
+                    group_location = raw_group_loc if isinstance(raw_group_loc, dict) else {}
+                
                 # Check location match
-                if group['location_area'] != location_key:
+                if group.get('location_area') != location_key:
                     # Check if within radius
-                    group_location = group['location']
                     if not self._is_within_radius(user_location, group_location):
                         continue
                 
                 # Check product match
-                group_products = set(group['target_products'])
+                group_products = set(group.get('target_products', []))
                 matching_products = required_products.intersection(group_products)
                 
                 if not matching_products:
@@ -168,16 +185,16 @@ class BuyingGroupTools:
                     continue
                 
                 matching_groups.append({
-                    'group_id': group['group_id'],
-                    'group_name': group['group_name'],
-                    'organizer_user_id': group['organizer_user_id'],
-                    'target_products': group['target_products'],
+                    'group_id': group.get('group_id', ''),
+                    'group_name': group.get('group_name', ''),
+                    'organizer_user_id': group.get('organizer_user_id', ''),
+                    'target_products': group.get('target_products', []),
                     'matching_products': list(matching_products),
                     'match_score': round(match_score, 1),
-                    'location': group['location'],
+                    'location': group_location,
                     'current_members': current_members,
                     'max_members': max_members,
-                    'status': group['group_status'],
+                    'status': group.get('group_status', 'forming'),
                     'deadline': group.get('deadline', ''),
                     'estimated_discount': f"{float(group.get('target_discount_min', 15))}-{float(group.get('target_discount_max', 30))}%"
                 })

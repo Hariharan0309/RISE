@@ -5,6 +5,7 @@ Tools for community forums with real-time translation and AI-powered moderation
 
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
+from botocore.exceptions import ClientError
 import logging
 from typing import Dict, Any, List, Optional
 import time
@@ -236,33 +237,29 @@ Text: {content[:1000]}"""
             Dict with posts and pagination info
         """
         try:
-            # Build query parameters
-            query_params = {
-                'Limit': limit,
-                'ScanIndexForward': False  # Most recent first
-            }
-            
+            # Scan params (Scan does not support ScanIndexForward; that's Query-only)
+            scan_params = {'Limit': limit}
             if last_evaluated_key:
-                query_params['ExclusiveStartKey'] = last_evaluated_key
-            
+                scan_params['ExclusiveStartKey'] = last_evaluated_key
+
             # If category filter, use GSI
             if category:
                 # For simplicity, scan with filter (in production, use GSI)
                 response = self.posts_table.scan(
                     FilterExpression=Attr('status').eq('active'),
-                    **query_params
+                    **scan_params
                 )
             else:
                 # Get all active posts
                 response = self.posts_table.scan(
                     FilterExpression=Attr('status').eq('active'),
-                    **query_params
+                    **scan_params
                 )
-            
+
             posts = response.get('Items', [])
-            
-            # Sort by timestamp
-            posts.sort(key=lambda x: x['timestamp'], reverse=True)
+
+            # Sort by timestamp (most recent first) - Scan has no sort order
+            posts.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
             
             return {
                 'success': True,
@@ -271,6 +268,12 @@ Text: {content[:1000]}"""
                 'last_evaluated_key': response.get('LastEvaluatedKey')
             }
         
+        except ClientError as e:
+            if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                logger.warning("RISE-ForumPosts table not found; returning empty list. Deploy the CDK stack to create it.")
+                return {'success': True, 'posts': [], 'count': 0, 'last_evaluated_key': None}
+            logger.error(f"Error getting posts: {e}")
+            return {'success': False, 'error': str(e), 'posts': []}
         except Exception as e:
             logger.error(f"Error getting posts: {e}")
             return {
@@ -541,6 +544,11 @@ Text: {content[:1000]}"""
                 'query': query
             }
         
+        except ClientError as e:
+            if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                return {'success': True, 'posts': [], 'count': 0, 'query': query}
+            logger.error(f"Error searching posts: {e}")
+            return {'success': False, 'error': str(e), 'posts': []}
         except Exception as e:
             logger.error(f"Error searching posts: {e}")
             return {
@@ -561,10 +569,23 @@ Text: {content[:1000]}"""
         """
         try:
             # Get user's posts
-            response = self.posts_table.scan(
-                FilterExpression=Attr('user_id').eq(user_id) & Attr('status').eq('active')
-            )
-            
+            try:
+                response = self.posts_table.scan(
+                    FilterExpression=Attr('user_id').eq(user_id) & Attr('status').eq('active')
+                )
+            except ClientError as ce:
+                if ce.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                    # Table not created yet; return empty reputation
+                    return {
+                        'success': True, 'user_id': user_id, 'reputation_score': 0, 'expertise_level': 0,
+                        'badge': 'New Member', 'badge_emoji': '🌱', 'badge_description': 'Just getting started',
+                        'is_verified_expert': False, 'expertise_areas': [], 'metrics': {
+                            'total_posts': 0, 'helpful_answers': 0, 'total_likes': 0, 'total_replies': 0,
+                            'total_views': 0, 'verified_solutions': 0, 'community_endorsements': 0,
+                            'engagement_rate': 0, 'avg_sentiment': 0, 'consistency_score': 0
+                        }, 'achievements': []
+                    }
+                raise
             posts = response.get('Items', [])
             
             # Calculate basic metrics
@@ -914,6 +935,11 @@ Text: {content[:1000]}"""
                 'expertise_filter': expertise_area
             }
         
+        except ClientError as e:
+            if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                return {'success': True, 'experts': [], 'count': 0, 'expertise_filter': expertise_area}
+            logger.error(f"Error getting top experts: {e}")
+            return {'success': False, 'error': str(e), 'experts': []}
         except Exception as e:
             logger.error(f"Error getting top experts: {e}")
             return {

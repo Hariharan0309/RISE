@@ -37,35 +37,42 @@ def render_weather_alerts_dashboard(user_id: str, location: Optional[Dict[str, A
         if st.button("🔄 Refresh Weather", use_container_width=True):
             with st.spinner("Fetching latest weather data..."):
                 result = tools.monitor_weather_conditions(user_id)
-                if result['success']:
+                if isinstance(result, dict) and result.get('success'):
                     st.session_state.weather_alert_data = result
                     st.success("Weather data updated!")
                 else:
-                    st.error(f"Failed to fetch weather: {result.get('error')}")
+                    err = result.get('error', result) if isinstance(result, dict) else result
+                    st.error(f"Failed to fetch weather: {err}")
     
     # Get weather alert data
     if 'weather_alert_data' not in st.session_state:
         with st.spinner("Loading weather alerts..."):
             result = tools.monitor_weather_conditions(user_id)
-            if result['success']:
+            if isinstance(result, dict) and result.get('success'):
                 st.session_state.weather_alert_data = result
             else:
-                st.error(f"Failed to load weather alerts: {result.get('error')}")
+                err = result.get('error', result) if isinstance(result, dict) else result
+                st.error(f"Failed to load weather alerts: {err}")
                 return
     
     data = st.session_state.weather_alert_data
-    
+    if not isinstance(data, dict):
+        del st.session_state.weather_alert_data
+        st.error("Weather data was invalid. Please refresh the page.")
+        return
+
     # Display location
     if location or data.get('location'):
         loc = location or data['location']
         st.info(f"📍 Location: {loc.get('name', 'Unknown')}")
     
     # Create tabs for different sections
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "⚠️ Alerts",
         "📋 Activities",
         "💧 Irrigation",
-        "🛡️ Protection"
+        "🛡️ Protection",
+        "🤖 AI Recommendations"
     ])
     
     with tab1:
@@ -79,6 +86,41 @@ def render_weather_alerts_dashboard(user_id: str, location: Optional[Dict[str, A
     
     with tab4:
         render_protective_measures_section(data.get('protective_measures', []))
+    
+    with tab5:
+        render_weather_ai_recommendations(location or data.get('location'))
+
+
+def render_weather_ai_recommendations(location: Optional[Dict[str, Any]]):
+    """Render AI-powered optimal crops and farming process recommendations based on weather."""
+    st.markdown("### Optimal Crops & Processes (AI)")
+    st.markdown("Get personalized advice on the best crops and farming activities for current and forecast weather.")
+    if not location or not isinstance(location, dict):
+        st.info("📍 Set your location in the app to get AI recommendations.")
+        return
+    lat = location.get('latitude')
+    lon = location.get('longitude')
+    if lat is None or lon is None:
+        st.info("📍 Latitude and longitude are needed. Use Chat or set location in profile.")
+        return
+    if 'weather_tools' not in st.session_state:
+        from tools.weather_tools import create_weather_tools
+        st.session_state.weather_tools = create_weather_tools()
+    weather_tools = st.session_state.weather_tools
+    user_crops = None
+    if hasattr(st.session_state, 'crops') and st.session_state.crops:
+        user_crops = list(st.session_state.crops)
+    if st.button("🤖 Get AI Recommendations", type="primary"):
+        with st.spinner("Analyzing weather and generating recommendations..."):
+            result = weather_tools.get_ai_weather_recommendations(
+                float(lat), float(lon),
+                location_name=location.get('name'),
+                user_crops=user_crops,
+            )
+        if result.get('success'):
+            st.markdown(result.get('analysis', ''))
+        else:
+            st.error(result.get('error', 'Failed to get recommendations'))
 
 
 def render_alerts_section(alerts: List[Dict[str, Any]]):
@@ -376,8 +418,11 @@ def render_weather_alerts_widget(user_id: str):
     
     # Get recent alerts
     result = tools.get_user_alerts(user_id, days=3)
-    
-    if result['success'] and result['alerts']:
+    if not isinstance(result, dict):
+        st.info("No recent weather data")
+        return
+
+    if result.get('success') and result.get('alerts'):
         latest_alert = result['alerts'][0]
         alert_count = len(latest_alert.get('alerts', []))
         
@@ -400,7 +445,7 @@ def render_weather_alerts_widget(user_id: str):
         st.info("No recent weather data")
     
     # Last updated
-    if result['success'] and result['alerts']:
+    if result.get('success') and result.get('alerts'):
         timestamp = result['alerts'][0].get('timestamp', '')
         if timestamp:
             try:

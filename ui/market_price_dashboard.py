@@ -53,6 +53,26 @@ def render_market_price_dashboard(market_tools, user_location: Dict[str, float])
         if result['success']:
             render_current_prices(result)
             
+            # AI insights on prices and selling
+            with st.expander("🤖 AI Insights on Prices & Selling"):
+                if st.button("Get AI analysis", key="market_ai_btn"):
+                    with st.spinner("Generating AI insights..."):
+                        from tools.ai_insights import get_ai_insight
+                        stats = result.get('statistics', {})
+                        markets_preview = ", ".join(
+                            f"{m['market_name']} ₹{m['price']}/q" for m in result.get('markets', [])[:5]
+                        )
+                        prompt = f"""You are an agricultural market advisor for Indian farmers. In 2-3 short paragraphs, give practical advice based on this data:
+
+Crop: {crop_name}. Average price: ₹{stats.get('avg_price', 0):.2f}/quintal. Range: ₹{stats.get('min_price', 0)}-₹{stats.get('max_price', 0)}. Markets: {markets_preview}.
+
+Provide: (1) What this price level means for the farmer. (2) Best time to sell and which market to prefer if possible. (3) One or two tips to get a better price. Keep it simple and actionable."""
+                        ai = get_ai_insight(prompt)
+                    if ai.get('success'):
+                        st.markdown(ai.get('text', ''))
+                    else:
+                        st.error(ai.get('error', 'Failed to generate insights'))
+            
             # Market selection for detailed analysis
             if result['markets']:
                 st.subheader("📈 Detailed Market Analysis")

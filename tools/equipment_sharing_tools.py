@@ -606,21 +606,6 @@ Pickup Details:
 """
         return instructions.strip()
 
-
-# Tool functions for agent integration
-
-def create_equipment_sharing_tools(region: str = "us-east-1") -> EquipmentSharingTools:
-    """
-    Factory function to create equipment sharing tools instance
-    
-    Args:
-        region: AWS region
-    
-    Returns:
-        EquipmentSharingTools instance
-    """
-    return EquipmentSharingTools(region=region)
-
     def process_payment(self,
                        booking_id: str,
                        payment_details: Dict[str, Any]) -> Dict[str, Any]:
@@ -962,3 +947,18 @@ def create_equipment_sharing_tools(region: str = "us-east-1") -> EquipmentSharin
                 'success': False,
                 'error': str(e)
             }
+
+
+# Tool functions for agent integration
+
+def create_equipment_sharing_tools(region: str = "us-east-1") -> EquipmentSharingTools:
+    """
+    Factory function to create equipment sharing tools instance
+
+    Args:
+        region: AWS region
+
+    Returns:
+        EquipmentSharingTools instance
+    """
+    return EquipmentSharingTools(region=region)

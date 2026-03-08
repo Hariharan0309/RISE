@@ -56,7 +56,7 @@ def render_application_wizard(tools: SchemeApplicationTools):
         st.info("💡 Please select a scheme from the Scheme Discovery page first")
         
         # Manual scheme ID input
-        scheme_id = st.text_input("Or enter Scheme ID manually", placeholder="SCH_XXXXXXXXXXXX")
+        scheme_id = st.text_input("Or enter Scheme ID manually", placeholder="SCH_XXXXXXXXXXXX", key="wizard_scheme_id_manual")
         
         if scheme_id:
             st.session_state.selected_scheme_id = scheme_id
@@ -64,14 +64,15 @@ def render_application_wizard(tools: SchemeApplicationTools):
         scheme_id = st.session_state.selected_scheme_id
     
     # User ID input
-    user_id = st.text_input("User ID", value=st.session_state.get('user_id', 'user_12345'))
+    user_id = st.text_input("User ID", value=st.session_state.get('user_id', 'user_12345'), key="wizard_user_id")
     
     # Language selection
     language = st.selectbox(
         "Preferred Language for Voice Guidance",
-        ["Hindi (हिंदी)", "English", "Tamil (தமிழ்)", "Telugu (తెలుగు)", 
-         "Kannada (ಕನ್ನಡ)", "Bengali (বাংলা)", "Gujarati (ગુજરાતી)", 
-         "Marathi (मराठी)", "Punjabi (ਪੰਜਾਬੀ)"]
+        ["Hindi (हिंदी)", "English", "Tamil (தமிழ்)", "Telugu (తెలుగు)",
+         "Kannada (ಕನ್ನಡ)", "Bengali (বাংলা)", "Gujarati (ગુજરાતી)",
+         "Marathi (मराठी)", "Punjabi (ਪੰਜਾਬੀ)"],
+        key="wizard_language"
     )
     
     language_codes = {
@@ -88,7 +89,7 @@ def render_application_wizard(tools: SchemeApplicationTools):
     
     lang_code = language_codes[language]
     
-    if st.button("🚀 Start Application Wizard", type="primary"):
+    if st.button("🚀 Start Application Wizard", type="primary", key="wizard_start_btn"):
         if not scheme_id:
             st.error("Please select or enter a scheme ID")
             return
@@ -155,21 +156,21 @@ def render_application_wizard(tools: SchemeApplicationTools):
                 
                 with col1:
                     if current_step > 0:
-                        if st.button("⬅️ Previous Step"):
+                        if st.button("⬅️ Previous Step", key="wizard_btn_prev"):
                             st.session_state.current_step -= 1
                             st.rerun()
                 
                 with col2:
-                    if st.button("✅ Mark Complete"):
+                    if st.button("✅ Mark Complete", key="wizard_btn_complete"):
                         st.success(f"Step {step['step_number']} completed!")
                 
                 with col3:
                     if current_step < len(wizard_steps) - 1:
-                        if st.button("Next Step ➡️"):
+                        if st.button("Next Step ➡️", key="wizard_btn_next"):
                             st.session_state.current_step += 1
                             st.rerun()
                     else:
-                        if st.button("🎉 Finish Wizard"):
+                        if st.button("🎉 Finish Wizard", key="wizard_btn_finish"):
                             st.success("🎉 Wizard completed! Proceed to document validation.")
                             st.session_state.current_step = 0
                 
@@ -200,7 +201,7 @@ def render_document_validation(tools: SchemeApplicationTools):
     st.markdown("### 📤 Upload Documents")
     
     # Number of documents
-    num_docs = st.number_input("Number of documents to upload", min_value=1, max_value=10, value=3)
+    num_docs = st.number_input("Number of documents to upload", min_value=1, max_value=10, value=3, key="doc_num_docs")
     
     documents = []
     
@@ -246,7 +247,7 @@ def render_document_validation(tools: SchemeApplicationTools):
                 'uploaded': uploaded_file is not None
             })
     
-    if st.button("🔍 Validate Documents", type="primary"):
+    if st.button("🔍 Validate Documents", type="primary", key="doc_validate_btn"):
         with st.spinner("Validating documents..."):
             result = tools.validate_documents(documents, scheme_id)
             
@@ -318,7 +319,7 @@ def render_application_submission(tools: SchemeApplicationTools):
     col1, col2 = st.columns(2)
     
     with col1:
-        user_id = st.text_input("User ID", value=st.session_state.get('user_id', 'user_12345'))
+        user_id = st.text_input("User ID", value=st.session_state.get('user_id', 'user_12345'), key="submit_user_id")
     
     with col2:
         scheme_id = st.text_input(
@@ -336,40 +337,41 @@ def render_application_submission(tools: SchemeApplicationTools):
         col1, col2 = st.columns(2)
         
         with col1:
-            full_name = st.text_input("Full Name", value="Ravi Kumar")
-            father_name = st.text_input("Father's Name", value="Ram Kumar")
+            full_name = st.text_input("Full Name", value="Ravi Kumar", key="submit_full_name")
+            father_name = st.text_input("Father's Name", value="Ram Kumar", key="submit_father_name")
         
         with col2:
-            date_of_birth = st.date_input("Date of Birth")
-            gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+            date_of_birth = st.date_input("Date of Birth", key="submit_dob")
+            gender = st.selectbox("Gender", ["Male", "Female", "Other"], key="submit_gender")
         
         # Contact information
         st.markdown("#### Contact Information")
         col1, col2 = st.columns(2)
         
         with col1:
-            mobile = st.text_input("Mobile Number", value="+91 9876543210")
-            email = st.text_input("Email", value="ravi.kumar@example.com")
+            mobile = st.text_input("Mobile Number", value="+91 9876543210", key="submit_mobile")
+            email = st.text_input("Email", value="ravi.kumar@example.com", key="submit_email")
         
         with col2:
-            address = st.text_area("Address", value="Village Rampur, District Lucknow")
+            address = st.text_area("Address", value="Village Rampur, District Lucknow", key="submit_address")
         
         # Bank details
         st.markdown("#### Bank Details")
         col1, col2 = st.columns(2)
         
         with col1:
-            bank_name = st.text_input("Bank Name", value="State Bank of India")
-            account_number = st.text_input("Account Number", value="1234567890")
+            bank_name = st.text_input("Bank Name", value="State Bank of India", key="submit_bank_name")
+            account_number = st.text_input("Account Number", value="1234567890", key="submit_account_number")
         
         with col2:
-            ifsc_code = st.text_input("IFSC Code", value="SBIN0001234")
-            account_holder = st.text_input("Account Holder Name", value="Ravi Kumar")
+            ifsc_code = st.text_input("IFSC Code", value="SBIN0001234", key="submit_ifsc")
+            account_holder = st.text_input("Account Holder Name", value="Ravi Kumar", key="submit_account_holder")
         
         # Declaration
         st.markdown("#### Declaration")
         declaration = st.checkbox(
-            "I declare that all information provided is true and correct to the best of my knowledge"
+            "I declare that all information provided is true and correct to the best of my knowledge",
+            key="submit_declaration"
         )
         
         # Submit button
@@ -436,7 +438,7 @@ def render_application_submission(tools: SchemeApplicationTools):
                         st.session_state.submitted_application_id = result['application_id']
                         
                         # Download receipt button
-                        if st.button("💾 Download Receipt"):
+                        if st.button("💾 Download Receipt", key="submit_download_receipt"):
                             st.info("Receipt download feature coming soon!")
                     
                     else:
@@ -455,10 +457,11 @@ def render_status_tracking(tools: SchemeApplicationTools):
     application_id = st.text_input(
         "Application ID or Tracking Number",
         value=st.session_state.get('submitted_application_id', ''),
-        placeholder="APP_XXXXXXXXXXXX or RISE-XXXX-XXXX"
+        placeholder="APP_XXXXXXXXXXXX or RISE-XXXX-XXXX",
+        key="track_application_id"
     )
     
-    if st.button("🔍 Track Status", type="primary"):
+    if st.button("🔍 Track Status", type="primary", key="track_status_btn"):
         if not application_id:
             st.error("Please enter an Application ID")
             return
@@ -528,12 +531,12 @@ def render_status_tracking(tools: SchemeApplicationTools):
                 col1, col2 = st.columns(2)
                 
                 with col1:
-                    sms_notifications = st.checkbox("SMS Notifications", value=True)
+                    sms_notifications = st.checkbox("SMS Notifications", value=True, key="track_sms_notif")
                 
                 with col2:
-                    voice_notifications = st.checkbox("Voice Notifications", value=True)
+                    voice_notifications = st.checkbox("Voice Notifications", value=True, key="track_voice_notif")
                 
-                if st.button("💾 Save Preferences"):
+                if st.button("💾 Save Preferences", key="track_save_prefs"):
                     st.success("Notification preferences saved!")
             
             else:

@@ -315,6 +315,21 @@ def display_economic_impact(result: Dict[str, Any]):
     else:
         st.error(f"📉 {sustainability_level}")
     
+    with st.expander("🤖 AI summary of your local economy impact"):
+        if st.button("Get AI summary", key="economy_ai_btn"):
+            with st.spinner("Generating summary..."):
+                from tools.ai_insights import get_ai_insight
+                prompt = f"""You are an agricultural economist. Summarize this local economy impact in 2 short paragraphs for a farmer.
+
+Metrics: Total economic benefit ₹{metrics.get('total_economic_benefit', 0):,.0f}; Farmers benefited: {summary.get('total_farmers_benefited', 0)}; Avg savings/farmer ₹{summary.get('average_savings_per_farmer', 0):,.0f}. Equipment utilization: {utilization.get('overall_rate', 0)}%. Cost savings ₹{cost_savings.get('total', 0):,.0f}. Additional income ₹{additional_income.get('total', 0):,.0f}. Cooperative savings ₹{coop_savings.get('total', 0):,.0f}. Engagement: {engagement_level}. Sustainability: {sustainability_level}.
+
+Say what this means in plain language and give 1-2 practical suggestions to benefit more from sharing."""
+                ai = get_ai_insight(prompt)
+            if ai.get('success'):
+                st.markdown(ai.get('text', ''))
+            else:
+                st.error(ai.get('error'))
+    
     # Export data option
     st.markdown("---")
     if st.button("📥 Export Report as JSON"):

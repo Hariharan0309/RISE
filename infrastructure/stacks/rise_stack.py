@@ -267,6 +267,32 @@ class RiseStack(Stack):
             projection_type=dynamodb.ProjectionType.ALL
         )
         
+        # Forum Posts Table (Farmer Forum)
+        self.forum_posts_table = dynamodb.Table(
+            self, "ForumPostsTable",
+            table_name="RISE-ForumPosts",
+            partition_key=dynamodb.Attribute(
+                name="post_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+        )
+        self.forum_posts_table.add_global_secondary_index(
+            index_name="UserPostsIndex",
+            partition_key=dynamodb.Attribute(
+                name="user_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="timestamp",
+                type=dynamodb.AttributeType.NUMBER
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+        
         # Resource Bookings Table
         self.resource_bookings_table = dynamodb.Table(
             self, "ResourceBookingsTable",
@@ -490,6 +516,70 @@ class RiseStack(Stack):
                 type=dynamodb.AttributeType.NUMBER
             ),
             projection_type=dynamodb.ProjectionType.ALL
+        )
+
+        # Supplier Negotiation Tables (AI-Powered Supplier Negotiation)
+        self.suppliers_table = dynamodb.Table(
+            self, "SuppliersTable",
+            table_name="RISE-Suppliers",
+            partition_key=dynamodb.Attribute(
+                name="supplier_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+        )
+        self.negotiations_table = dynamodb.Table(
+            self, "NegotiationsTable",
+            table_name="RISE-Negotiations",
+            partition_key=dynamodb.Attribute(
+                name="negotiation_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+        )
+        self.supplier_quotes_table = dynamodb.Table(
+            self, "SupplierQuotesTable",
+            table_name="RISE-SupplierQuotes",
+            partition_key=dynamodb.Attribute(
+                name="quote_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+        )
+
+        # Best Practices Library tables
+        self.best_practices_table = dynamodb.Table(
+            self, "BestPracticesTable",
+            table_name="RISE-BestPractices",
+            partition_key=dynamodb.Attribute(
+                name="practice_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+        )
+        self.practice_adoptions_table = dynamodb.Table(
+            self, "PracticeAdoptionsTable",
+            table_name="RISE-PracticeAdoptions",
+            partition_key=dynamodb.Attribute(
+                name="adoption_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+            point_in_time_recovery=True,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
         )
 
     def _create_dax_cluster(self):
@@ -770,9 +860,9 @@ class RiseStack(Stack):
                 logging_level=apigateway.MethodLoggingLevel.INFO,
                 data_trace_enabled=True,
                 metrics_enabled=True,
-                # Enable caching with 6 hours TTL for weather/market data
+                # Enable caching (API Gateway max TTL is 3600 seconds)
                 caching_enabled=True,
-                cache_ttl=Duration.hours(6),
+                cache_ttl=Duration.seconds(3600),
                 cache_cluster_enabled=True,
                 cache_cluster_size="0.5"  # 0.5 GB cache
             ),

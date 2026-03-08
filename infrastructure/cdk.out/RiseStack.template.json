@@ -1,6 +1,609 @@
 {
  "Description": "RISE - Rural Innovation and Sustainable Ecosystem Infrastructure",
  "Resources": {
+  "RiseVPC6BEBDBC5": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/Resource"
+   }
+  },
+  "RiseVPCPublicSubnet1Subnet6F9360CE": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": {
+     "Fn::Select": [
+      0,
+      {
+       "Fn::GetAZs": ""
+      }
+     ]
+    },
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet1/Subnet"
+   }
+  },
+  "RiseVPCPublicSubnet1RouteTableDD14BE3E": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet1/RouteTable"
+   }
+  },
+  "RiseVPCPublicSubnet1RouteTableAssociation9D81E1CA": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "RiseVPCPublicSubnet1RouteTableDD14BE3E"
+    },
+    "SubnetId": {
+     "Ref": "RiseVPCPublicSubnet1Subnet6F9360CE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "RiseVPCPublicSubnet1DefaultRoute3603D2FE": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "RiseVPCIGW189C8201"
+    },
+    "RouteTableId": {
+     "Ref": "RiseVPCPublicSubnet1RouteTableDD14BE3E"
+    }
+   },
+   "DependsOn": [
+    "RiseVPCVPCGW6E4BF5D5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "RiseVPCPublicSubnet1EIPDEEB6A24": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PublicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet1/EIP"
+   }
+  },
+  "RiseVPCPublicSubnet1NATGatewayE4D33BA7": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "RiseVPCPublicSubnet1EIPDEEB6A24",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "RiseVPCPublicSubnet1Subnet6F9360CE"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PublicSubnet1"
+     }
+    ]
+   },
+   "DependsOn": [
+    "RiseVPCPublicSubnet1DefaultRoute3603D2FE",
+    "RiseVPCPublicSubnet1RouteTableAssociation9D81E1CA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet1/NATGateway"
+   }
+  },
+  "RiseVPCPublicSubnet2SubnetFAB26F43": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": {
+     "Fn::Select": [
+      1,
+      {
+       "Fn::GetAZs": ""
+      }
+     ]
+    },
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet2/Subnet"
+   }
+  },
+  "RiseVPCPublicSubnet2RouteTableFD070354": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet2/RouteTable"
+   }
+  },
+  "RiseVPCPublicSubnet2RouteTableAssociation9A74F8BC": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "RiseVPCPublicSubnet2RouteTableFD070354"
+    },
+    "SubnetId": {
+     "Ref": "RiseVPCPublicSubnet2SubnetFAB26F43"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "RiseVPCPublicSubnet2DefaultRouteE9AB02A1": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "RiseVPCIGW189C8201"
+    },
+    "RouteTableId": {
+     "Ref": "RiseVPCPublicSubnet2RouteTableFD070354"
+    }
+   },
+   "DependsOn": [
+    "RiseVPCVPCGW6E4BF5D5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "RiseVPCPrivateSubnet1SubnetD6B1E1F4": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": {
+     "Fn::Select": [
+      0,
+      {
+       "Fn::GetAZs": ""
+      }
+     ]
+    },
+    "CidrBlock": "10.0.2.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PrivateSubnet1/Subnet"
+   }
+  },
+  "RiseVPCPrivateSubnet1RouteTable9B1F7799": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PrivateSubnet1/RouteTable"
+   }
+  },
+  "RiseVPCPrivateSubnet1RouteTableAssociation9F17124C": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "RiseVPCPrivateSubnet1RouteTable9B1F7799"
+    },
+    "SubnetId": {
+     "Ref": "RiseVPCPrivateSubnet1SubnetD6B1E1F4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PrivateSubnet1/RouteTableAssociation"
+   }
+  },
+  "RiseVPCPrivateSubnet1DefaultRouteEE9ECA4D": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "RiseVPCPublicSubnet1NATGatewayE4D33BA7"
+    },
+    "RouteTableId": {
+     "Ref": "RiseVPCPrivateSubnet1RouteTable9B1F7799"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PrivateSubnet1/DefaultRoute"
+   }
+  },
+  "RiseVPCPrivateSubnet2Subnet76B0E70F": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": {
+     "Fn::Select": [
+      1,
+      {
+       "Fn::GetAZs": ""
+      }
+     ]
+    },
+    "CidrBlock": "10.0.3.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PrivateSubnet2/Subnet"
+   }
+  },
+  "RiseVPCPrivateSubnet2RouteTable2840EE13": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PrivateSubnet2/RouteTable"
+   }
+  },
+  "RiseVPCPrivateSubnet2RouteTableAssociationC0566DBB": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "RiseVPCPrivateSubnet2RouteTable2840EE13"
+    },
+    "SubnetId": {
+     "Ref": "RiseVPCPrivateSubnet2Subnet76B0E70F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PrivateSubnet2/RouteTableAssociation"
+   }
+  },
+  "RiseVPCPrivateSubnet2DefaultRouteF679F532": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "RiseVPCPublicSubnet1NATGatewayE4D33BA7"
+    },
+    "RouteTableId": {
+     "Ref": "RiseVPCPrivateSubnet2RouteTable2840EE13"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/PrivateSubnet2/DefaultRoute"
+   }
+  },
+  "RiseVPCIGW189C8201": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "RiseStack/RiseVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/IGW"
+   }
+  },
+  "RiseVPCVPCGW6E4BF5D5": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "RiseVPCIGW189C8201"
+    },
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/VPCGW"
+   }
+  },
+  "RiseVPCRestrictDefaultSecurityGroupCustomResource637A4F6C": {
+   "Type": "Custom::VpcRestrictDefaultSG",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E",
+      "Arn"
+     ]
+    },
+    "DefaultSecurityGroupId": {
+     "Fn::GetAtt": [
+      "RiseVPC6BEBDBC5",
+      "DefaultSecurityGroup"
+     ]
+    },
+    "Account": {
+     "Ref": "AWS::AccountId"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RiseVPC/RestrictDefaultSecurityGroupCustomResource/Default"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyName": "Inline",
+      "PolicyDocument": {
+       "Version": "2012-10-17",
+       "Statement": [
+        {
+         "Effect": "Allow",
+         "Action": [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress"
+         ],
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             "arn:aws:ec2:us-east-1:",
+             {
+              "Ref": "AWS::AccountId"
+             },
+             ":security-group/",
+             {
+              "Fn::GetAtt": [
+               "RiseVPC6BEBDBC5",
+               "DefaultSecurityGroup"
+              ]
+             }
+            ]
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1"
+     },
+     "S3Key": "7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "__entrypoint__.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": "Lambda function for removing all inbound/outbound rules from the VPC default security group"
+   },
+   "DependsOn": [
+    "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200",
+    "aws:asset:property": "Code"
+   }
+  },
+  "RedisSecurityGroupB05951F6": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for ElastiCache Redis",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": {
+       "Fn::GetAtt": [
+        "RiseVPC6BEBDBC5",
+        "CidrBlock"
+       ]
+      },
+      "Description": "Allow Redis access from VPC",
+      "FromPort": 6379,
+      "IpProtocol": "tcp",
+      "ToPort": 6379
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RedisSecurityGroup/Resource"
+   }
+  },
+  "DaxSecurityGroupC27BF149": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for DynamoDB DAX",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": {
+       "Fn::GetAtt": [
+        "RiseVPC6BEBDBC5",
+        "CidrBlock"
+       ]
+      },
+      "Description": "Allow DAX access from VPC",
+      "FromPort": 8111,
+      "IpProtocol": "tcp",
+      "ToPort": 8111
+     }
+    ],
+    "VpcId": {
+     "Ref": "RiseVPC6BEBDBC5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/DaxSecurityGroup/Resource"
+   }
+  },
   "UserProfilesTableF49D814C": {
    "Type": "AWS::DynamoDB::Table",
    "Properties": {
@@ -309,6 +912,62 @@
    "DeletionPolicy": "Retain",
    "Metadata": {
     "aws:cdk:path": "RiseStack/BuyingGroupsTable/Resource"
+   }
+  },
+  "ForumPostsTableECD598B5": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "post_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "user_id",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "timestamp",
+      "AttributeType": "N"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "UserPostsIndex",
+      "KeySchema": [
+       {
+        "AttributeName": "user_id",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "timestamp",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "post_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-ForumPosts"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/ForumPostsTable/Resource"
    }
   },
   "ResourceBookingsTableCB830633": {
@@ -757,6 +1416,354 @@
     "aws:cdk:path": "RiseStack/GovernmentSchemesTable/Resource"
    }
   },
+  "SuppliersTableF9BC2E6D": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "supplier_id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "supplier_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-Suppliers"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/SuppliersTable/Resource"
+   }
+  },
+  "NegotiationsTableE4A1294E": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "negotiation_id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "negotiation_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-Negotiations"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/NegotiationsTable/Resource"
+   }
+  },
+  "SupplierQuotesTable9CAC773B": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "quote_id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "quote_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-SupplierQuotes"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/SupplierQuotesTable/Resource"
+   }
+  },
+  "BestPracticesTableA2F1ED13": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "practice_id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "practice_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-BestPractices"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/BestPracticesTable/Resource"
+   }
+  },
+  "PracticeAdoptionsTable0194FDDA": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "adoption_id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "adoption_id",
+      "KeyType": "HASH"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "TableName": "RISE-PracticeAdoptions"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/PracticeAdoptionsTable/Resource"
+   }
+  },
+  "DaxServiceRole2D2D58ED": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "dax.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "Service role for DynamoDB DAX cluster"
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/DaxServiceRole/Resource"
+   }
+  },
+  "DaxServiceRoleDefaultPolicyF1BE0C7D": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "DiagnosisHistoryTable955DE619",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "FarmDataTable7C8AF09F",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "GovernmentSchemesTable59D45A93",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "MarketPricesTableB0175D8F",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "UserProfilesTableF49D814C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "WeatherForecastTableAB2E017D",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "DiagnosisHistoryTable955DE619",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "GovernmentSchemesTable59D45A93",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "MarketPricesTableB0175D8F",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "UserProfilesTableF49D814C",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "DaxServiceRoleDefaultPolicyF1BE0C7D",
+    "Roles": [
+     {
+      "Ref": "DaxServiceRole2D2D58ED"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/DaxServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "DaxSubnetGroup": {
+   "Type": "AWS::DAX::SubnetGroup",
+   "Properties": {
+    "Description": "Subnet group for RISE DAX cluster",
+    "SubnetGroupName": "rise-dax-subnet-group",
+    "SubnetIds": [
+     {
+      "Ref": "RiseVPCPrivateSubnet1SubnetD6B1E1F4"
+     },
+     {
+      "Ref": "RiseVPCPrivateSubnet2Subnet76B0E70F"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/DaxSubnetGroup"
+   }
+  },
+  "DaxCluster": {
+   "Type": "AWS::DAX::Cluster",
+   "Properties": {
+    "ClusterName": "rise-dax-cluster",
+    "Description": "DAX cluster for RISE hot data caching",
+    "IAMRoleARN": {
+     "Fn::GetAtt": [
+      "DaxServiceRole2D2D58ED",
+      "Arn"
+     ]
+    },
+    "NodeType": "dax.t3.small",
+    "ReplicationFactor": 2,
+    "SSESpecification": {
+     "SSEEnabled": true
+    },
+    "SecurityGroupIds": [
+     {
+      "Fn::GetAtt": [
+       "DaxSecurityGroupC27BF149",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetGroupName": "rise-dax-subnet-group"
+   },
+   "DependsOn": [
+    "DaxSubnetGroup"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/DaxCluster"
+   }
+  },
   "AppDataBucket857FA106": {
    "Type": "AWS::S3::Bucket",
    "Properties": {
@@ -945,6 +1952,58 @@
     "aws:cdk:path": "RiseStack/AppDataBucket/Policy/Resource"
    }
   },
+  "RedisSubnetGroup": {
+   "Type": "AWS::ElastiCache::SubnetGroup",
+   "Properties": {
+    "CacheSubnetGroupName": "rise-redis-subnet-group",
+    "Description": "Subnet group for RISE Redis cluster",
+    "SubnetIds": [
+     {
+      "Ref": "RiseVPCPrivateSubnet1SubnetD6B1E1F4"
+     },
+     {
+      "Ref": "RiseVPCPrivateSubnet2Subnet76B0E70F"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RedisSubnetGroup"
+   }
+  },
+  "RedisCluster": {
+   "Type": "AWS::ElastiCache::ReplicationGroup",
+   "Properties": {
+    "AtRestEncryptionEnabled": true,
+    "AutoMinorVersionUpgrade": true,
+    "AutomaticFailoverEnabled": true,
+    "CacheNodeType": "cache.t3.micro",
+    "CacheSubnetGroupName": "rise-redis-subnet-group",
+    "Engine": "redis",
+    "EngineVersion": "7.0",
+    "MultiAZEnabled": true,
+    "NumCacheClusters": 2,
+    "PreferredMaintenanceWindow": "sun:05:00-sun:07:00",
+    "ReplicationGroupDescription": "Redis cluster for RISE session and application caching",
+    "ReplicationGroupId": "rise-redis-cluster",
+    "SecurityGroupIds": [
+     {
+      "Fn::GetAtt": [
+       "RedisSecurityGroupB05951F6",
+       "GroupId"
+      ]
+     }
+    ],
+    "SnapshotRetentionLimit": 5,
+    "SnapshotWindow": "03:00-05:00",
+    "TransitEncryptionEnabled": true
+   },
+   "DependsOn": [
+    "RedisSubnetGroup"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/RedisCluster"
+   }
+  },
   "RiseOAIE1B76470": {
    "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
    "Properties": {
@@ -960,10 +2019,11 @@
    "Type": "AWS::CloudFront::CachePolicy",
    "Properties": {
     "CachePolicyConfig": {
+     "Comment": "Cache policy for static content with 1 year TTL",
      "DefaultTTL": 31536000,
      "MaxTTL": 31536000,
      "MinTTL": 86400,
-     "Name": "RiseStackStaticContentCachePolicyCAA37C08-us-east-1",
+     "Name": "RiseStaticContentPolicy",
      "ParametersInCacheKeyAndForwardedToOrigin": {
       "CookiesConfig": {
        "CookieBehavior": "none"
@@ -987,10 +2047,42 @@
    "Type": "AWS::CloudFront::CachePolicy",
    "Properties": {
     "CachePolicyConfig": {
+     "Comment": "Cache policy for images with 7 days TTL",
      "DefaultTTL": 604800,
      "MaxTTL": 2592000,
      "MinTTL": 3600,
-     "Name": "RiseStackImagesCachePolicy7FB41D93-us-east-1",
+     "Name": "RiseImagesPolicy",
+     "ParametersInCacheKeyAndForwardedToOrigin": {
+      "CookiesConfig": {
+       "CookieBehavior": "none"
+      },
+      "EnableAcceptEncodingBrotli": true,
+      "EnableAcceptEncodingGzip": true,
+      "HeadersConfig": {
+       "HeaderBehavior": "whitelist",
+       "Headers": [
+        "Accept"
+       ]
+      },
+      "QueryStringsConfig": {
+       "QueryStringBehavior": "none"
+      }
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "RiseStack/ImagesCachePolicy/Resource"
+   }
+  },
+  "DocumentsCachePolicyA0359792": {
+   "Type": "AWS::CloudFront::CachePolicy",
+   "Properties": {
+    "CachePolicyConfig": {
+     "Comment": "Cache policy for documents with 1 day TTL",
+     "DefaultTTL": 86400,
+     "MaxTTL": 604800,
+     "MinTTL": 3600,
+     "Name": "RiseDocumentsPolicy",
      "ParametersInCacheKeyAndForwardedToOrigin": {
       "CookiesConfig": {
        "CookieBehavior": "none"
@@ -1007,7 +2099,7 @@
     }
    },
    "Metadata": {
-    "aws:cdk:path": "RiseStack/ImagesCachePolicy/Resource"
+    "aws:cdk:path": "RiseStack/DocumentsCachePolicy/Resource"
    }
   },
   "RiseDistributionLoggingBucket8039A7DD": {
@@ -1058,9 +2150,18 @@
        "PathPattern": "images/*",
        "TargetOriginId": "RiseStackRiseDistributionOrigin3185BD099",
        "ViewerProtocolPolicy": "redirect-to-https"
+      },
+      {
+       "CachePolicyId": {
+        "Ref": "DocumentsCachePolicyA0359792"
+       },
+       "Compress": true,
+       "PathPattern": "documents/*",
+       "TargetOriginId": "RiseStackRiseDistributionOrigin454442E0D",
+       "ViewerProtocolPolicy": "redirect-to-https"
       }
      ],
-     "Comment": "RISE CDN Distribution",
+     "Comment": "RISE CDN Distribution with optimized caching",
      "DefaultCacheBehavior": {
       "AllowedMethods": [
        "GET",
@@ -1073,7 +2174,7 @@
       "ViewerProtocolPolicy": "redirect-to-https"
      },
      "Enabled": true,
-     "HttpVersion": "http2",
+     "HttpVersion": "http2and3",
      "IPV6Enabled": true,
      "Logging": {
       "Bucket": {
@@ -1149,6 +2250,28 @@
          ]
         }
        }
+      },
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "AppDataBucket857FA106",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "RiseStackRiseDistributionOrigin454442E0D",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "RiseOAIE1B76470"
+           }
+          ]
+         ]
+        }
+       }
       }
      ],
      "PriceClass": "PriceClass_200"
@@ -1161,7 +2284,7 @@
   "RiseRestApi653CC8E0": {
    "Type": "AWS::ApiGateway::RestApi",
    "Properties": {
-    "Description": "RISE Farming Assistant REST API",
+    "Description": "RISE Farming Assistant REST API with caching",
     "Name": "RISE-API"
    },
    "Metadata": {
@@ -1223,10 +2346,10 @@
     "aws:cdk:path": "RiseStack/RiseRestApi/Account"
    }
   },
-  "RiseRestApiDeploymentBD243178c88d6bfe3ea472da0177413cac3064ea": {
+  "RiseRestApiDeploymentBD2431787adec04b91b4a80f7a91c39e31bc18dc": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
-    "Description": "RISE Farming Assistant REST API",
+    "Description": "RISE Farming Assistant REST API with caching",
     "RestApiId": {
      "Ref": "RiseRestApi653CC8E0"
     }
@@ -1337,7 +2460,7 @@
     "CacheClusterEnabled": true,
     "CacheClusterSize": "0.5",
     "DeploymentId": {
-     "Ref": "RiseRestApiDeploymentBD243178c88d6bfe3ea472da0177413cac3064ea"
+     "Ref": "RiseRestApiDeploymentBD2431787adec04b91b4a80f7a91c39e31bc18dc"
     },
     "MethodSettings": [
      {
@@ -4447,7 +5570,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21Ry26DMBD8ltyNE0g+oHkoUg9VIlKpx8qYTdgGbITXjZDlf69sSKFSTzuzO559OOMu26z4aiEeJpHlPamx4O5CQt6ZeJhPV/ZKNLosuHsXRQ1sf1UReGbW3O2svAOF5IiGcNY1yn5KD9wzWWtbXjutiLtThzdUWynBmNcSFCHFF/ugOQbN/wohK5j85/SAhjosLKFWoTbnnokWb4LgIXrucjC0bTGIZnArpbaK2AHaWvcNqLjYjF1I3OIFBpCD0baTsBMG2BtQpctQHNGzOjaJ2DMUDXe5Hg4Z47TL80rTpN8Zd2GwYb7Y1fs/zidLrSXP0nTD00TUbSX4avEy/uYyxLndqHAfUFx0+Jlg/UueDc49VVot1zxd82zxZRCTzirCBng+xB9Zq3+CNwIAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21TwY6bMBD9ltwdb0L2A8pm21UO7SKotsfKmNkwDdjIHidFFv9e2RBAVU7z3sz4zfMYEu6T5x3fbcTNbmV12TZYcl+QkBcmbva3B5lw/9FJdvxUH9mRZa5sUBauVEAht6BcO4KfomxgyS+51FotURBqNTcH8PWUhfBD0JsguImeZQavgmARPikCo2BuGJ1MLCUSsm5BEStAOoPUvxntuuhhnRhY1SvR6qrkfnYZwcBQtNzneszFmOkGZRw1ooFV4i/388XmGcfGWQIzMHvg/sXJy+h5QmNYxNZ8YNAISyiFrOGRdA5dgzKubLqBbLSrPo1WxP27wTOqVEqw9lSBIqR+NKRd9S30PO4I0xZDa/qKlgyW7v5Gaz4w0eF5XDn3OVhKOxxNzjCVUjtF7BW6RvfxSYLKwgoS5/HjiCAHq52R8CIssO9Ata5CcUL36jQk4rWLaxJ3Ns2OisOwOuUs6faRyH+lzOgrVmCii9RaoKCF6hzOvDvqHA1sv3/m+61oulrw3ebL9LM8hbh2NHX4X1AWOrx0cDeTu8esp1qrpwPfH3iy+WMRt8YpwhZ4PsZ/zR1Cz5YDAAA="
    },
    "Metadata": {
     "aws:cdk:path": "RiseStack/CDKMetadata/Default"
@@ -4475,6 +5598,106 @@
       "/"
      ]
     ]
+   }
+  },
+  "CloudFrontDistributionURL": {
+   "Description": "CloudFront distribution URL for static content delivery",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "RiseDistribution2EC067CB",
+        "DomainName"
+       ]
+      }
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "RiseCloudFrontURL"
+   }
+  },
+  "ApiGatewayEndpoint": {
+   "Description": "API Gateway REST API endpoint",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "RiseRestApi653CC8E0"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "RiseRestApiDeploymentStagev161411663"
+      },
+      "/"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "RiseApiEndpoint"
+   }
+  },
+  "RedisClusterEndpoint": {
+   "Description": "ElastiCache Redis cluster primary endpoint",
+   "Value": {
+    "Fn::GetAtt": [
+     "RedisCluster",
+     "PrimaryEndPoint.Address"
+    ]
+   },
+   "Export": {
+    "Name": "RiseRedisEndpoint"
+   }
+  },
+  "RedisClusterPort": {
+   "Description": "ElastiCache Redis cluster port",
+   "Value": {
+    "Fn::GetAtt": [
+     "RedisCluster",
+     "PrimaryEndPoint.Port"
+    ]
+   },
+   "Export": {
+    "Name": "RiseRedisPort"
+   }
+  },
+  "DaxClusterEndpoint": {
+   "Description": "DynamoDB DAX cluster discovery endpoint",
+   "Value": {
+    "Fn::GetAtt": [
+     "DaxCluster",
+     "ClusterDiscoveryEndpoint"
+    ]
+   },
+   "Export": {
+    "Name": "RiseDaxEndpoint"
+   }
+  },
+  "S3BucketName": {
+   "Description": "S3 bucket for application data",
+   "Value": {
+    "Ref": "AppDataBucket857FA106"
+   },
+   "Export": {
+    "Name": "RiseS3Bucket"
+   }
+  },
+  "VpcId": {
+   "Description": "VPC ID for ElastiCache and DAX",
+   "Value": {
+    "Ref": "RiseVPC6BEBDBC5"
+   },
+   "Export": {
+    "Name": "RiseVpcId"
    }
   }
  },

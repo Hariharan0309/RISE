@@ -54,18 +54,25 @@ SUBNETS_TEXT=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" -
 # Convert tab-separated or space-separated strong to array
 SUBNETS_ARRAY=($SUBNETS_TEXT)
 
-ALB_SG_ID=$(aws ec2 describe-security-groups --group-names rise-alb-sg --profile $AWS_PROFILE --region $AWS_REGION --query "SecurityGroups[0].GroupId" --output text 2>/dev/null || true)
+# Look up SGs by name + VPC (works even when group already exists from a previous run)
+ALB_SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=rise-alb-sg" "Name=vpc-id,Values=$VPC_ID" --profile $AWS_PROFILE --region $AWS_REGION --query "SecurityGroups[0].GroupId" --output text 2>/dev/null || true)
 if [ -z "$ALB_SG_ID" ] || [ "$ALB_SG_ID" = "None" ]; then
     echo "Creating ALB SG..."
-    ALB_SG_ID=$(aws ec2 create-security-group --group-name rise-alb-sg --description "ALB Security Group" --vpc-id $VPC_ID --profile $AWS_PROFILE --region $AWS_REGION --query "GroupId" --output text)
-    aws ec2 authorize-security-group-ingress --group-id $ALB_SG_ID --protocol tcp --port 80 --cidr 0.0.0.0/0 --profile $AWS_PROFILE --region $AWS_REGION
+    ALB_SG_ID=$(aws ec2 create-security-group --group-name rise-alb-sg --description "ALB Security Group" --vpc-id $VPC_ID --profile $AWS_PROFILE --region $AWS_REGION --query "GroupId" --output text 2>/dev/null) || true
+    if [ -z "$ALB_SG_ID" ] || [ "$ALB_SG_ID" = "None" ]; then
+        ALB_SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=rise-alb-sg" "Name=vpc-id,Values=$VPC_ID" --profile $AWS_PROFILE --region $AWS_REGION --query "SecurityGroups[0].GroupId" --output text)
+    fi
+    aws ec2 authorize-security-group-ingress --group-id $ALB_SG_ID --protocol tcp --port 80 --cidr 0.0.0.0/0 --profile $AWS_PROFILE --region $AWS_REGION 2>/dev/null || true
 fi
 
-ECS_SG_ID=$(aws ec2 describe-security-groups --group-names rise-ecs-sg --profile $AWS_PROFILE --region $AWS_REGION --query "SecurityGroups[0].GroupId" --output text 2>/dev/null || true)
+ECS_SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=rise-ecs-sg" "Name=vpc-id,Values=$VPC_ID" --profile $AWS_PROFILE --region $AWS_REGION --query "SecurityGroups[0].GroupId" --output text 2>/dev/null || true)
 if [ -z "$ECS_SG_ID" ] || [ "$ECS_SG_ID" = "None" ]; then
     echo "Creating ECS SG..."
-    ECS_SG_ID=$(aws ec2 create-security-group --group-name rise-ecs-sg --description "ECS Security Group" --vpc-id $VPC_ID --profile $AWS_PROFILE --region $AWS_REGION --query "GroupId" --output text)
-    aws ec2 authorize-security-group-ingress --group-id $ECS_SG_ID --protocol tcp --port 8080 --source-group $ALB_SG_ID --profile $AWS_PROFILE --region $AWS_REGION
+    ECS_SG_ID=$(aws ec2 create-security-group --group-name rise-ecs-sg --description "ECS Security Group" --vpc-id $VPC_ID --profile $AWS_PROFILE --region $AWS_REGION --query "GroupId" --output text 2>/dev/null) || true
+    if [ -z "$ECS_SG_ID" ] || [ "$ECS_SG_ID" = "None" ]; then
+        ECS_SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=rise-ecs-sg" "Name=vpc-id,Values=$VPC_ID" --profile $AWS_PROFILE --region $AWS_REGION --query "SecurityGroups[0].GroupId" --output text)
+    fi
+    aws ec2 authorize-security-group-ingress --group-id $ECS_SG_ID --protocol tcp --port 8080 --source-group $ALB_SG_ID --profile $AWS_PROFILE --region $AWS_REGION 2>/dev/null || true
 fi
 
 TG_ARN=$(aws elbv2 describe-target-groups --names $TG_NAME --profile $AWS_PROFILE --region $AWS_REGION --query "TargetGroups[0].TargetGroupArn" --output text 2>/dev/null || true)
@@ -139,6 +146,33 @@ cat > /tmp/bedrock-policy.json << EOF
 }
 EOF
 aws iam put-role-policy --role-name $ROLE_NAME --policy-name BedrockAccessPolicy --policy-document file:///tmp/bedrock-policy.json --profile $AWS_PROFILE
+
+# DynamoDB: allow app to read/write RISE tables (Equipment Marketplace, Forum, etc.)
+cat > /tmp/dynamodb-policy.json << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Scan",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/RISE-*"
+      ]
+    }
+  ]
+}
+EOF
+aws iam put-role-policy --role-name $ROLE_NAME --policy-name RISEDynamoDBPolicy --policy-document file:///tmp/dynamodb-policy.json --profile $AWS_PROFILE
 
 cat > /tmp/task-def.json << EOF
 {

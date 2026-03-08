@@ -4,6 +4,7 @@ Tools for negotiating with suppliers, managing bulk pricing requests, quality ve
 """
 
 import boto3
+from botocore.exceptions import ClientError
 import logging
 import json
 import uuid
@@ -78,9 +79,15 @@ class SupplierNegotiationTools:
                 'active': True
             }
             
-            # Store in DynamoDB
-            self.suppliers_table.put_item(Item=supplier_item)
-            
+            try:
+                self.suppliers_table.put_item(Item=supplier_item)
+            except ClientError as e:
+                if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                    return {
+                        'success': False,
+                        'error': 'Supplier tables are not set up yet. Deploy the CDK stack to create RISE-Suppliers, RISE-Negotiations, and RISE-SupplierQuotes tables.'
+                    }
+                raise
             logger.info(f"Supplier registered: {supplier_id}")
             
             return {
@@ -111,15 +118,19 @@ class SupplierNegotiationTools:
             Dict with matching suppliers
         """
         try:
-            # Query suppliers by product type
-            response = self.suppliers_table.scan(
-                FilterExpression='active = :active AND verification_status = :verified',
-                ExpressionAttributeValues={
-                    ':active': True,
-                    ':verified': 'verified'
-                }
-            )
-            
+            try:
+                response = self.suppliers_table.scan(
+                    FilterExpression='active = :active AND verification_status = :verified',
+                    ExpressionAttributeValues={
+                        ':active': True,
+                        ':verified': 'verified'
+                    }
+                )
+            except ClientError as e:
+                if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                    logger.warning("RISE-Suppliers table not found; returning empty list. Deploy CDK stack to create tables.")
+                    return {'success': True, 'count': 0, 'suppliers': []}
+                raise
             suppliers = response.get('Items', [])
             matching_suppliers = []
             
@@ -255,8 +266,15 @@ Keep it concise, professional, and persuasive. Write in both Hindi and English f
                 'deadline': (datetime.now() + timedelta(days=7)).isoformat()
             }
             
-            self.negotiations_table.put_item(Item=negotiation_item)
-            
+            try:
+                self.negotiations_table.put_item(Item=negotiation_item)
+            except ClientError as e:
+                if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                    return {
+                        'success': False,
+                        'error': 'Negotiation tables are not set up yet. Deploy the CDK stack to create RISE-Suppliers, RISE-Negotiations, and RISE-SupplierQuotes tables.'
+                    }
+                raise
             logger.info(f"Bulk pricing request generated: {negotiation_id}")
             
             return {

@@ -96,7 +96,11 @@ def render_find_groups(buying_tools):
             with st.spinner("Searching for matching groups..."):
                 result = buying_tools.find_matching_groups(user_id, requirements)
             
-            if result['success']:
+            # Ensure result is a dict (tool may rarely return str on unexpected failure)
+            if not isinstance(result, dict):
+                st.error(f"Search failed: {result if isinstance(result, str) else 'Unknown error'}")
+                return
+            if result.get('success'):
                 st.success(f"✓ Found {result['count']} matching groups")
                 
                 if result['groups']:
@@ -132,7 +136,8 @@ def render_find_groups(buying_tools):
                 else:
                     st.info("No matching groups found. Consider creating a new group!")
             else:
-                st.error(f"Search failed: {result.get('error')}")
+                err = result.get('error', 'Unknown error') if isinstance(result, dict) else str(result)
+                st.error(f"Search failed: {err}")
 
 
 def show_group_details(buying_tools, group, user_id):
@@ -153,6 +158,21 @@ def show_group_details(buying_tools, group, user_id):
         st.write(f"**Estimated Discount:** {group['estimated_discount']}")
         st.write(f"**Deadline:** {group.get('deadline', 'Not set')}")
         st.write(f"**Match Score:** {group['match_score']}%")
+    
+    with st.expander("🤖 AI advice: Should I join this group?"):
+        if st.button("Get AI advice", key=f"bg_ai_{group.get('group_id', 'g')}"):
+            with st.spinner("Generating advice..."):
+                from tools.ai_insights import get_ai_insight
+                prompt = f"""You are a cooperative farming advisor. A farmer is considering joining this buying group. In 2 short paragraphs, give clear advice.
+
+Group: {group.get('group_name', '')}. Products: {', '.join(group.get('matching_products', []))}. Members: {group.get('current_members', 0)}/{group.get('max_members', 0)}. Estimated discount: {group.get('estimated_discount', '')}. Match score: {group.get('match_score', 0)}%.
+
+Say: (1) Whether joining is a good idea and why. (2) What to watch out for or confirm before joining. Be practical and supportive."""
+                ai = get_ai_insight(prompt)
+            if ai.get('success'):
+                st.markdown(ai.get('text', ''))
+            else:
+                st.error(ai.get('error'))
     
     # Join form
     st.subheader("Join This Group")
@@ -422,9 +442,20 @@ def show_full_group_details(buying_tools, group_id):
             st.write(f"**Organizer:** {result['organizer_user_id']}")
         
         with col_b:
-            st.write(f"**Location:** {result['location']['district']}, {result['location']['state']}")
+            loc = result.get('location') or {}
+            loc_dist = loc.get('district', '') if isinstance(loc, dict) else str(loc)
+            loc_state = loc.get('state', '') if isinstance(loc, dict) else ''
+            st.write(f"**Location:** {loc_dist}, {loc_state}")
             st.write(f"**Deadline:** {result.get('deadline', 'Not set')}")
-            st.write(f"**Created:** {datetime.fromtimestamp(result['created_timestamp']).strftime('%Y-%m-%d')}")
+            ts = result.get('created_timestamp')
+            if ts is not None:
+                try:
+                    ts_val = int(ts) if not isinstance(ts, (int, float)) else ts
+                    st.write(f"**Created:** {datetime.fromtimestamp(ts_val).strftime('%Y-%m-%d')}")
+                except (TypeError, OSError):
+                    st.write(f"**Created:** {ts}")
+            else:
+                st.write("**Created:** —")
         
         if result['total_quantities']:
             st.subheader("Total Quantities Needed")

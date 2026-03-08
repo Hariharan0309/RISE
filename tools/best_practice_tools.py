@@ -5,6 +5,7 @@ Tools for submitting, validating, and tracking farming best practices
 
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
+from botocore.exceptions import ClientError
 import logging
 from typing import Dict, Any, List, Optional
 import time
@@ -254,8 +255,13 @@ Respond with JSON only:
                 query_params['ExclusiveStartKey'] = last_evaluated_key
             
             # Scan with filter
-            response = self.practices_table.scan(**query_params)
-            
+            try:
+                response = self.practices_table.scan(**query_params)
+            except ClientError as e:
+                if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                    logger.warning("RISE-BestPractices table not found; returning empty list.")
+                    return {'success': True, 'practices': [], 'count': 0, 'last_evaluated_key': None}
+                raise
             practices = response.get('Items', [])
             
             # Apply category filter
@@ -582,11 +588,16 @@ Respond with JSON only:
             practice = practice_result['practice']
             
             # Get all adoptions
-            adoptions_response = self.adoptions_table.scan(
-                FilterExpression=Attr('practice_id').eq(practice_id)
-            )
-            
-            adoptions = adoptions_response.get('Items', [])
+            try:
+                adoptions_response = self.adoptions_table.scan(
+                    FilterExpression=Attr('practice_id').eq(practice_id)
+                )
+                adoptions = adoptions_response.get('Items', [])
+            except ClientError as e:
+                if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                    adoptions = []
+                else:
+                    raise
             
             # Calculate analytics
             total_adoptions = len(adoptions)
@@ -676,12 +687,15 @@ Respond with JSON only:
             Dict with search results
         """
         try:
-            # Scan all active practices
-            response = self.practices_table.scan(
-                FilterExpression=Attr('status').eq('active'),
-                Limit=limit * 2
-            )
-            
+            try:
+                response = self.practices_table.scan(
+                    FilterExpression=Attr('status').eq('active'),
+                    Limit=limit * 2
+                )
+            except ClientError as e:
+                if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                    return {'success': True, 'practices': [], 'count': 0, 'query': query}
+                raise
             practices = response.get('Items', [])
             
             # Filter by query
@@ -804,11 +818,19 @@ Respond with JSON only:
             Dict with user contributions
         """
         try:
-            # Get user's practices
-            response = self.practices_table.scan(
-                FilterExpression=Attr('user_id').eq(user_id) & Attr('status').eq('active')
-            )
-            
+            try:
+                response = self.practices_table.scan(
+                    FilterExpression=Attr('user_id').eq(user_id) & Attr('status').eq('active')
+                )
+            except ClientError as e:
+                if e.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                    return {
+                        'success': True, 'user_id': user_id,
+                        'contributions': {'total_practices': 0, 'total_adoptions': 0, 'total_successful': 0,
+                                          'avg_success_rate': 0, 'most_popular_practice': None},
+                        'practices': []
+                    }
+                raise
             practices = response.get('Items', [])
             
             # Calculate impact metrics

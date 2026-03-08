@@ -115,17 +115,26 @@ def render_profile_analysis(tools: SchemeDiscoveryTools):
                 # Display AI analysis
                 st.markdown("### 🤖 AI Analysis")
                 
+                def _display_value(v):
+                    """Handle both string and dict items from analysis."""
+                    if isinstance(v, str):
+                        return v.replace('_', ' ').title()
+                    if isinstance(v, dict):
+                        raw = v.get('name') or v.get('category') or v.get('title') or next(iter(v.values()), '')
+                        return str(raw).replace('_', ' ').title()
+                    return str(v)
+
                 st.markdown("**Relevant Scheme Categories:**")
                 for category in analysis.get('relevant_categories', []):
-                    st.markdown(f"- {category.replace('_', ' ').title()}")
+                    st.markdown(f"- {_display_value(category)}")
                 
                 st.markdown("**Identified Needs:**")
                 for need in analysis.get('farmer_needs', []):
-                    st.markdown(f"- {need}")
+                    st.markdown(f"- {_display_value(need)}")
                 
                 st.markdown("**Priority Areas:**")
                 for area in analysis.get('priority_areas', []):
-                    st.markdown(f"- {area}")
+                    st.markdown(f"- {_display_value(area)}")
                 
                 st.info(f"💰 Estimated Benefits: {analysis.get('estimated_benefits', 'Moderate')}")
                 
@@ -253,6 +262,20 @@ def render_scheme_card(scheme: dict, index: int):
         # Application link
         if scheme.get('official_website'):
             st.markdown(f"**🔗 Official Website:** [{scheme['official_website']}]({scheme['official_website']})")
+        # AI: explain in simple terms
+        if st.button("🤖 Explain in simple terms", key=f"scheme_ai_{scheme.get('scheme_id', index)}"):
+            with st.spinner("Generating simple explanation..."):
+                from tools.ai_insights import get_ai_insight
+                prompt = f"""Explain this government scheme for farmers in 2 short, simple paragraphs. Use everyday language.
+
+Scheme: {scheme.get('scheme_name', '')}. Category: {scheme.get('category', '')}. Description: {scheme.get('description', 'No description')}. Benefit: ₹{scheme.get('estimated_benefit', 0):,.0f}. Documents needed: {scheme.get('required_documents', [])}.
+
+Say: (1) What the scheme is and who it is for. (2) What the farmer needs to do to apply and what they get. No jargon."""
+                ai = get_ai_insight(prompt)
+            if ai.get('success'):
+                st.markdown(ai.get('text', ''))
+            else:
+                st.error(ai.get('error', 'Failed to generate explanation'))
 
 
 def render_eligibility_check(tools: SchemeDiscoveryTools):
@@ -267,18 +290,25 @@ def render_eligibility_check(tools: SchemeDiscoveryTools):
     farmer_profile = st.session_state.farmer_profile
     
     # Check if recommendations exist
+    scheme_id = None
     if 'recommended_schemes' in st.session_state:
         schemes = st.session_state.recommended_schemes
-        scheme_options = {f"{s['scheme_name']} ({s['scheme_id']})": s['scheme_id'] for s in schemes}
-        
-        selected_scheme = st.selectbox(
-            "Select a scheme to check eligibility",
-            options=list(scheme_options.keys())
-        )
-        
-        scheme_id = scheme_options[selected_scheme]
+        scheme_options = {f"{s['scheme_name']} ({s['scheme_id']})": s['scheme_id'] for s in (schemes or [])}
+        if scheme_options:
+            options_list = list(scheme_options.keys())
+            selected_scheme = st.selectbox(
+                "Select a scheme to check eligibility",
+                options=options_list,
+                index=0,
+                key="eligibility_scheme_select"
+            )
+            scheme_id = scheme_options.get(selected_scheme) if selected_scheme else (list(scheme_options.values())[0] if scheme_options else None)
+        else:
+            scheme_id = st.text_input("Enter Scheme ID", placeholder="SCH_XXXXXXXXXXXX", key="eligibility_scheme_id_manual")
     else:
-        scheme_id = st.text_input("Enter Scheme ID", placeholder="SCH_XXXXXXXXXXXX")
+        scheme_id = st.text_input("Enter Scheme ID", placeholder="SCH_XXXXXXXXXXXX", key="eligibility_scheme_id_manual")
+    if scheme_id is None:
+        scheme_id = ""
     
     if st.button("✅ Check Eligibility", type="primary"):
         if not scheme_id:
